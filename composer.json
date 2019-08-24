@@ -1,0 +1,43 @@
+{
+    "name": "cvsouth/entities",
+
+    "description": "Joined-table inheritance for Laravel",
+
+    "require": {
+
+        "illuminate/support": "5.6.*|5.7.*|5.8.*",
+      
+        "illuminate/database": "5.6.*|5.7.*|5.8.*"
+    },
+    "license": "proprietary",
+
+    "authors": [
+        {
+            "name": "Colin South",
+
+            "email": "colin@riseresolution.com"
+        }
+    ],
+    "autoload": {
+
+        "psr-4": {
+
+            "Cvsouth\\Entities\\": "src/"
+        },
+        "files": [
+        ]
+    },
+    "minimum-stability": "dev",
+
+    "extra":
+    {
+        "laravel":
+        {
+            "providers":
+            [
+                "Cvsouth\\Entities\\Providers\\ServiceProvider"
+            ]
+        }
+    },
+    "require-dev": { }
+}

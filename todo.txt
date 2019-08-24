@@ -1,0 +1,4 @@
+[ ] Top_class caching optimisation (prevents querying base table on elevate and joins to base table)
+[ ] Stop using $fillable to map field hierarchy (https://github.com/cvsouth/entities/issues/21)
+[ ] Eliminate EntityType
+

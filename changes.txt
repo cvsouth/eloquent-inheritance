@@ -1,0 +1,9 @@
+
+Entity::GetWithEntityID becomes Entities::getWithEntityID
+
+Entity::GetWithID becomes Entities::getWithID
+
+Entity::ElevateMultiple becomes Entities::elevateMultiple
+
+Entity::TableName becomes Entity::tableName
+
