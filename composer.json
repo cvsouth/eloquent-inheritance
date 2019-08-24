@@ -1,5 +1,5 @@
 {
-    "name": "cvsouth/entities",
+    "name": "cvsouth/eloquent-inheritance",
 
     "description": "Joined-table inheritance for Laravel",
 
@@ -22,7 +22,7 @@
 
         "psr-4": {
 
-            "Cvsouth\\Entities\\": "src/"
+            "Cvsouth\\EloquentInheritance\\": "src/"
         },
         "files": [
         ]
@@ -35,7 +35,7 @@
         {
             "providers":
             [
-                "Cvsouth\\Entities\\Providers\\ServiceProvider"
+                "Cvsouth\\EloquentInheritance\\Providers\\ServiceProvider"
             ]
         }
     },
