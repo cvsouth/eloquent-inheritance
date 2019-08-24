@@ -1,12 +1,12 @@
-<?php namespace Cvsouth\Entities\Providers;
+<?php namespace Cvsouth\EloquentInheritance\Providers;
 
-use Cvsouth\Entities\Entity;
+use Cvsouth\EloquentInheritance\InheritableModel;
 
-use Cvsouth\Entities\EntityType;
+use Cvsouth\EloquentInheritance\ModelType;
 
-use Cvsouth\Entities\Services\Entities;
+use Cvsouth\EloquentInheritance\Services\EloquentInheritance;
 
-use Cvsouth\Entities\Facades\Entities as EntitiesFacade;
+use Cvsouth\EloquentInheritance\Facades\EloquentInheritance as EloquentInheritanceFacade;
 
 use Illuminate\Foundation\AliasLoader;
 
@@ -20,13 +20,14 @@ class ServiceProvider extends BaseServiceProvider
     }
     public function register()
     {
-        AliasLoader::getInstance()->alias('Entity', Entity::class);
+        AliasLoader::getInstance()->alias('InheritableModel', InheritableModel::class);
 
-        AliasLoader::getInstance()->alias('EntityType', EntityType::class);
+        AliasLoader::getInstance()->alias('ModelType', ModelType::class);
 
 
-        $this->app->singleton('entities', function () { return new Entities(); });
-        AliasLoader::getInstance()->alias('Entities', EntitiesFacade::class);
+        $this->app->singleton('eloquent-inheritance', function () { return new EloquentInheritance(); });
+
+        AliasLoader::getInstance()->alias('EloquentInheritance', EloquentInheritanceFacade::class);
 
     }
 }

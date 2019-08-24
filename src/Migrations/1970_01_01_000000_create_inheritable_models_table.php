@@ -6,11 +6,11 @@ use Illuminate\Database\Schema\Blueprint;
 
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEntitiesTable extends Migration
+class CreateInheritableModelsTable extends Migration
 {
     public function up()
     {
-        Schema::create('entities', function (Blueprint $table)
+        Schema::create('inheritable_models', function (Blueprint $table)
         {
             $table->bigIncrements('id');
             
@@ -19,6 +19,6 @@ class CreateEntitiesTable extends Migration
     }
     public function down()
     {
-        Schema::drop('entities');
+        Schema::drop('inheritable_models');
     }
 }

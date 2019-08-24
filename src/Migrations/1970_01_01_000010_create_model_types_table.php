@@ -6,11 +6,11 @@ use Illuminate\Database\Schema\Blueprint;
 
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEntityTypesTable extends Migration
+class CreateModelTypesTable extends Migration
 {
     public function up()
     {
-        Schema::create('entity_types', function (Blueprint $table)
+        Schema::create('model_types', function (Blueprint $table)
         {
             $table->bigInteger('entity_id')->unsigned();
             
@@ -21,6 +21,6 @@ class CreateEntityTypesTable extends Migration
     }
     public function down()
     {
-        Schema::dropIfExists('entity_types');
+        Schema::dropIfExists('model_types');
     }
 }

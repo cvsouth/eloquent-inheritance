@@ -1,4 +1,4 @@
-<?php namespace Cvsouth\Entities;
+<?php namespace Cvsouth\EloquentInheritance;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -6,7 +6,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 use Illuminate\Pagination\Paginator;
 
-class EntityQueryBuilder extends QueryBuilder
+class InheritableQueryBuilder extends QueryBuilder
 {
     private $model = null;
 
@@ -34,7 +34,7 @@ class EntityQueryBuilder extends QueryBuilder
         {
             $from = $this->from;
            
-            $entity_class = EntityType::FromTableName($from)->entity_class;
+            $entity_class = ModelType::FromTableName($from)->entity_class;
             
             $model = new $entity_class;
            

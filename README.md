@@ -36,7 +36,7 @@ class Bird extends Animal
 }
 ```
 
-When creating your migrations, include `entity_id` and insert a new `EntityType` object:
+When creating your migrations, include `entity_id` and insert a new `ModelType` object:
 
 ```php
 class CreateAnimalsTable extends Migration
@@ -51,14 +51,14 @@ class CreateAnimalsTable extends Migration
             $table->string('name', 250)->nullable();
         });
         
-        $entity_type = new EntityType(["entity_class" => Animal::class]); $entity_type->save();
+        $entity_type = new ModelType(["entity_class" => Animal::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('animals');
                 
-        $entity_type = EntityType::where("entity_class", Animal::class)->first(); if($entity_type) EntityType::destroy([$entity_type->id]);
+        $entity_type = ModelType::where("entity_class", Animal::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```
@@ -75,14 +75,14 @@ class CreateBirdsTable extends Migration
             $table->boolean('flying');
         });
         
-        $entity_type = new EntityType(["entity_class" => Bird::class]); $entity_type->save();
+        $entity_type = new ModelType(["entity_class" => Bird::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('birds');
         
-        $entity_type = EntityType::where("entity_class", Bird::class)->first(); if($entity_type) EntityType::destroy([$entity_type->id]);
+        $entity_type = ModelType::where("entity_class", Bird::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```
@@ -174,14 +174,14 @@ class CreateTrainersTable extends Migration
             $table->foreign('animal_id')->references('id')->on('animals')->onDelete('cascade');
         });
         
-        $entity_type = new EntityType(["entity_class" => Trainer::class]); $entity_type->save();
+        $entity_type = new ModelType(["entity_class" => Trainer::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('trainers');
                 
-        $entity_type = EntityType::where("entity_class", Trainer::class)->first(); if($entity_type) EntityType::destroy([$entity_type->id]);
+        $entity_type = ModelType::where("entity_class", Trainer::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```

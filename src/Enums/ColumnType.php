@@ -1,4 +1,4 @@
-<?php namespace Cvsouth\Entities\Enums;
+<?php namespace Cvsouth\EloquentInheritance\Enums;
 
 abstract class ColumnType
 {

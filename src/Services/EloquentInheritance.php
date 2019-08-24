@@ -1,11 +1,14 @@
-<?php namespace Cvsouth\Entities\Services;
+<?php namespace Cvsouth\EloquentInheritance\Services;
+
+use Cvsouth\EloquentInheritance\InheritableModel;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Cvsouth\Entities\Entity;
 
-class Entities
+use Illuminate\Support\Facades\Cache;
+
+use Illuminate\Support\Facades\DB;
+
+class EloquentInheritance
 {
     public function topClassWithEntityID($entity_id)
     {
@@ -61,7 +64,7 @@ class Entities
     {
         $top_class = $this->topClassWithEntityID($entity_id);
         
-        if($top_class != Entity::class)
+        if($top_class != InheritableModel::class)
             $entity = $top_class::where('entity_id', $entity_id)->first();
         else $entity = $top_class::where('id', $entity_id)->first();
 

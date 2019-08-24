@@ -1,8 +1,8 @@
-<?php namespace Cvsouth\Entities;
+<?php namespace Cvsouth\EloquentInheritance;
 
-use Cvsouth\Entities\Facades\Entities;
+use Cvsouth\EloquentInheritance\Facades\EloquentInheritance;
 
-use Cvsouth\Entities\Enums\ColumnType;
+use Cvsouth\EloquentInheritance\Enums\ColumnType;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -18,13 +18,13 @@ use Illuminate\Support\Facades\Schema;
 
 use Exception;
 
-class Entity extends Model
+class InheritableModel extends Model
 {
-    public static $name = 'Entity';
+    public static $name = 'InheritableModel';
 
-    public static $name_plural = 'Entities';
+    public static $name_plural = 'InheritableModels';
 
-    public $table = 'entities';
+    public $table = 'inheritable_models';
 
     protected $fillable = ['id', 'top_class', 'entity_id'];
 
@@ -44,19 +44,19 @@ class Entity extends Model
     }
     public function newEloquentBuilder($query)
     {
-        return new EntityBuilder($query);
+        return new InheritableBuilder($query);
     }
     protected function newBaseQueryBuilder()
     {
         $connection = $this->getConnection();
 
-        return new EntityQueryBuilder($connection, $connection->getQueryGrammar(), $connection->getPostProcessor());
+        return new InheritableQueryBuilder($connection, $connection->getQueryGrammar(), $connection->getPostProcessor());
     }
     public function __set($key, $value)
     {
         if($key == 'entity_id')
         {
-            if(static::class == Entity::class)
+            if(static::class == self::class)
 
                 return $this->setAttribute('id', $value);
 
@@ -64,7 +64,7 @@ class Entity extends Model
         }
         else if($this->hasAttribute($key)) return $this->setAttribute($key, $value);
 
-        else if(static::class == Entity::class) return $this->setAttribute($key, $value);
+        else if(static::class == self::class) return $this->setAttribute($key, $value);
 
         else return $this->parent_model()->$key = $value;
     }
@@ -82,11 +82,11 @@ class Entity extends Model
 
         if($attr === 'id') return $this;
 
-        while(!$entity->hasAttribute($attr) && \get_class($entity) !== Entity::class)
+        while(!$entity->hasAttribute($attr) && \get_class($entity) !== self::class)
 
             $entity = $entity->parent_model();
 
-        if(($entity_class = \get_class($entity)) === Entity::class)
+        if(($entity_class = \get_class($entity)) === self::class)
 
             return $this->hasAttribute($attr);
 
@@ -107,12 +107,10 @@ class Entity extends Model
             return $entity;
         });
     }
-  
     public function getEntityId()
     {
         return $this->entity_id;
     }
-
     public function fetchLocalAttributes()
     {
         $table = static::tableName();
@@ -139,7 +137,7 @@ class Entity extends Model
         {
             case 'entity_id':
 
-                if(static::class === Entity::class)
+                if(static::class === self::class)
 
                     return $this->id;
 
@@ -171,7 +169,7 @@ class Entity extends Model
 
                 $attr = $this->getAttribute($attr_);
 
-                if(static::class === Entity::class)
+                if(static::class === self::class)
 
                     return $attr;
 
@@ -182,6 +180,7 @@ class Entity extends Model
                 else if($attr === null && !array_key_exists($attr_, $this->attributesToArray()))
                 {
                     $this->fetchLocalAttributes();
+
                     return $this->getAttribute($attr_);
                 }
                 else return $attr;
@@ -191,19 +190,19 @@ class Entity extends Model
     {
         if($entity_class_ === null)
 
-            throw new Exception('Entity::id_as() called without entity_class being specified (NULL)');
+            throw new Exception('InheritableModel::id_as() called without entity_class being specified (NULL)');
 
         $entity = $this;
 
-        while(($entity_class = \get_class($entity)) !== $entity_class_ && $entity_class !== Entity::class)
+        while(($entity_class = \get_class($entity)) !== $entity_class_ && $entity_class !== self::class)
 
             $entity = $entity->parent_model();
 
         return $entity->id;
     }
-    public function model_as($entity_class_
+    public function model_as($entity_class_)
     {
-        return Entities::getWithEntityID($this->entity_id, $entity_class_);
+        return EloquentInheritance::getWithEntityID($this->entity_id, $entity_class_);
     }
     // given attributes are optional and just for when the object is created but not yet saved to database
 
@@ -221,7 +220,7 @@ class Entity extends Model
 
                     return false;
                 }
-                if($parent_class != Entity::class)
+                if($parent_class != self::class)
 
                     $entity_id_column = 'entity_id';
 
@@ -230,6 +229,7 @@ class Entity extends Model
                 if($this->hasAttribute('entity_id') && ($entity_id = $this->entity_id))
                 {
 //                    $parent_table_name = $parent_class::tableName();
+
 //                    $data = (array) DB::table($parent_table_name)->where($entity_id_column, '=', $entity_id)->first();
 
                     $data = ['entity_id' => $entity_id];
@@ -242,7 +242,7 @@ class Entity extends Model
 
                 if($data === null) $data = [];
 
-                $this->parent_ = Entity::createNew($parent_class, $data);
+                $this->parent_ = self::createNew($parent_class, $data);
             }
             else if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
@@ -256,9 +256,9 @@ class Entity extends Model
     {
         if($entity_class === null)
 
-            $entity_class = Entity::class;
+            $entity_class = self::class;
 
-        if($entity_class !== Entity::class)
+        if($entity_class !== self::class)
 
             $entity = $entity_class::where('entity_id', $entity_id)->first();
 
@@ -282,7 +282,7 @@ class Entity extends Model
     {
         $entity_id = $this->entity_id;
         
-        $top_class = Entities::topClassWithEntityID($entity_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
+        $top_class = EloquentInheritance::topClassWithEntityID($entity_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
         
         $current_class = static::class;
         
@@ -354,7 +354,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -389,7 +389,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -424,7 +424,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -458,7 +458,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -493,7 +493,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -538,7 +538,7 @@ class Entity extends Model
 
             $entity = $this;
 
-            while($entity !== null && \get_class($entity) !== Entity::class)
+            while($entity !== null && \get_class($entity) !== self::class)
             {
                 $chain[] = $entity;
 
@@ -571,7 +571,7 @@ class Entity extends Model
     {
         if($type === null)
 
-            $type = EntityType::From(static::class);
+            $type = ModelType::From(static::class);
 
         $entity_class = $type->entity_class;
 
@@ -645,7 +645,7 @@ class Entity extends Model
 
         $entity = $this;
 
-        while(($current_class = \get_class($entity)) !== Entity::class)
+        while(($current_class = \get_class($entity)) !== self::class)
         {
             $save_queue[] = $entity;
 
@@ -663,7 +663,7 @@ class Entity extends Model
         {
             $current_class = \get_class($save_item);
 
-            if($current_class !== Entity::class)
+            if($current_class !== self::class)
 
                 $save_item->entity_id = $entity_id;
 
@@ -685,6 +685,7 @@ class Entity extends Model
             $saved = $this->performInsert($query);
 
             // TODO: Debug this. Does the new entity even have top_class / parent classes registered?
+
             Cache::forever('#' . $this->entity_id, $this->top_class);
         }
 
@@ -717,6 +718,7 @@ class Entity extends Model
             if($parent_model == null)
             {
                 Cache::forget('#' . $this->entity_id);
+
                 return true;
             }
             else return $parent_model->delete();

@@ -1,10 +1,10 @@
-<?php namespace Cvsouth\Entities;
+<?php namespace Cvsouth\EloquentInheritance;
 
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Facades\Cache;
 
-class EntityType extends Entity
+class ModelType extends Entity
 {
     public static $name = 'Entity Type';
    
@@ -26,7 +26,7 @@ class EntityType extends Entity
     }
     public static function From($entity_class_)
     {
-        $entity_type = EntityType::where("entity_class", "=", $entity_class_)->first();
+        $entity_type = ModelType::where("entity_class", "=", $entity_class_)->first();
  
         return $entity_type;
     }
@@ -65,11 +65,11 @@ class EntityType extends Entity
     {
         if(is_string($entity_type))
             
-            $entity_type = EntityType::From($entity_type);
+            $entity_type = ModelType::From($entity_type);
 
         $entity_class = $entity_type->entity_class;
 
-        if($entity_class === Entity::class || $entity_class === EntityType::class)
+        if($entity_class === Entity::class || $entity_class === ModelType::class)
             
             return [];
 
@@ -79,13 +79,13 @@ class EntityType extends Entity
 
         while(($entity_class = get_parent_class($entity_class)) !== $end_class)
             
-            $parents[] = EntityType::From($entity_class);
+            $parents[] = ModelType::From($entity_class);
 
         return $parents;
     }
     public static function GetChildren($entity_type_, $recursive = false, $include_entity = false)
     {
-        $cache_key = "EntityType_GetChildren_" . $entity_type_->id_as(EntityType::class);
+        $cache_key = "ModelType_GetChildren_" . $entity_type_->id_as(ModelType::class);
         
         if(Cache::has($cache_key))
         {
@@ -127,7 +127,7 @@ class EntityType extends Entity
     }
     public function selectByTerm($term = null)
     {
-        return EntityType
+        return ModelType
          
             ::where('entity_class', 'LIKE', '%' . $term . '%');
     }

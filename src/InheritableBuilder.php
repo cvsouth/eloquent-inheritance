@@ -1,6 +1,6 @@
-<?php namespace Cvsouth\Entities;
+<?php namespace Cvsouth\EloquentInheritance;
 
-use Cvsouth\Entities\Facades\Entities;
+use Cvsouth\EloquentInheritance\Facades\Entities;
 
 use Illuminate\Database\Eloquent\Builder;
 
@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Pagination\Paginator;
 
-class EntityBuilder extends Builder
+class InheritableBuilder extends Builder
 {
     public function setModel(Model $model)
     {
