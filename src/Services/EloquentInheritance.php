@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 use Illuminate\Support\Facades\DB;
+
 use Illuminate\Support\Facades\Log;
 
 class EloquentInheritance
@@ -16,20 +17,26 @@ class EloquentInheritance
         $cache_key = '#' . $base_id;
 
         if(Cache::has($cache_key))
-            
+
             return Cache::get($cache_key);
-        
+
         else
         {
-            $top_class = DB::table(InheritableModel::tableName())->select('top_class')->where('id', '=', $base_id)->first();
-            
+            $top_class = DB
+
+                ::table(InheritableModel::tableName())
+
+                ->where('id', '=', $base_id)
+
+                ->value('top_class');
+
             if($top_class)
 
                 Cache::forever('#' . $base_id, $top_class);
-            
+
             return $top_class;
         }
-        
+
 //        else // cache is granular and should be permanant, but if the cache is bust or something,
 //            // when that occurs, let's just rebuild the entire cache again.
 //            // for a large database this could take a long time
@@ -81,11 +88,11 @@ class EloquentInheritance
     public function getWithBaseId($base_id, $top_class = null)
     {
         $top_class = $top_class ?? $this->topClassWithBaseId($base_id);
-        
+
         if($top_class != InheritableModel::class)
-            
+
             $entity = $top_class::where('base_id', $base_id)->first();
-        
+
         else $entity = $top_class::where('id', $base_id)->first();
 
         return $entity;
@@ -99,7 +106,7 @@ class EloquentInheritance
         $elevated_entities = [];
 
         foreach($entities as $i => $entity)
-            
+
             $elevated_entities[$i] = $entity->elevate();
 
         if($is_collection) $elevated_entities = collect($elevated_entities);
