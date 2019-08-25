@@ -57,7 +57,7 @@ class InheritableQueryBuilder extends QueryBuilder
 
         $model = $this->model();
       
-        $entity_model = new Entity;
+        $entity_model = new InheritableModel();
 
         if($column === $entity_model->getUpdatedAtColumn()
        
@@ -97,9 +97,9 @@ class InheritableQueryBuilder extends QueryBuilder
            
                         return $column;
             }
-            $entity_id_column = (($table === $entity_model->table_name()) ? ($table . ".id") : ($table . ".entity_id"));
+            $base_id_column = (($table === $entity_model->table_name()) ? ($table . ".id") : ($table . ".base_id"));
             
-            $this->join($table, $entity_id_column, "=", $this->from . ".entity_id");
+            $this->join($table, $base_id_column, "=", $this->from . ".base_id");
         }
         return $column;
     }

@@ -25,7 +25,7 @@ class ServiceProvider extends BaseServiceProvider
         AliasLoader::getInstance()->alias('ModelType', ModelType::class);
 
 
-        $this->app->singleton('eloquent-inheritance', function () { return new EloquentInheritance(); });
+        $this->app->singleton('elouquent-inheritance', function () { return new EloquentInheritance(); });
 
         AliasLoader::getInstance()->alias('EloquentInheritance', EloquentInheritanceFacade::class);
 

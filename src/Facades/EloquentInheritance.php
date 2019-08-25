@@ -6,6 +6,6 @@ class EloquentInheritance extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'elouqent-inheritance';
+        return 'elouquent-inheritance';
     }
 }

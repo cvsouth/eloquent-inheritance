@@ -1,5 +1,5 @@
 
-Entity::GetWithEntityID becomes Entities::getWithEntityID
+Entity::GetWithBaseId becomes Entities::getWithBaseId
 
 Entity::GetWithID becomes Entities::getWithID
 

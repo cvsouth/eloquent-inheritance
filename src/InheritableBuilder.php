@@ -1,5 +1,6 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
+use Cvsouth\EloquentInheritance\Facades\EloquentInheritance;
 use Cvsouth\EloquentInheritance\Facades\Entities;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +23,7 @@ class InheritableBuilder extends Builder
     {
         $collection = parent::get($columns);
 
-        if($elevate) $collection = Entities::elevateMultiple($collection);
+        if($elevate) $collection = EloquentInheritance::elevateMultiple($collection);
       
         return $collection;
     }

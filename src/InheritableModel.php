@@ -20,13 +20,13 @@ use Exception;
 
 class InheritableModel extends Model
 {
-    public static $name = 'InheritableModel';
+    public static $name = 'Inheritable Model';
 
-    public static $name_plural = 'InheritableModels';
+    public static $name_plural = 'Inheritable Models';
 
-    public $table = 'inheritable_models';
+    public $table = 'base_models';
 
-    protected $fillable = ['id', 'top_class', 'entity_id'];
+    protected $fillable = ['id', 'top_class', 'base_id'];
 
     protected $guarded = [];
 
@@ -54,7 +54,7 @@ class InheritableModel extends Model
     }
     public function __set($key, $value)
     {
-        if($key == 'entity_id')
+        if($key == 'base_id')
         {
             if(static::class == self::class)
 
@@ -107,21 +107,21 @@ class InheritableModel extends Model
             return $entity;
         });
     }
-    public function getEntityId()
+    public function getBaseId()
     {
-        return $this->entity_id;
+        return $this->base_id;
     }
     public function fetchLocalAttributes()
     {
         $table = static::tableName();
         
-        $entity_id = $this->getEntityId();
+        $base_id = $this->getBaseId();
         
         $attributes_array = $this->fillable;
         
         $attributes_array[] = 'id';
 
-        $data = (array) DB::table($table)->where('entity_id', '=', $entity_id)->first();
+        $data = (array) DB::table($table)->where('base_id', '=', $base_id)->first();
 
         foreach($data as $key => $value)
         
@@ -135,13 +135,13 @@ class InheritableModel extends Model
     {
         switch($attr_)
         {
-            case 'entity_id':
+            case 'base_id':
 
                 if(static::class === self::class)
 
                     return $this->id;
 
-                else return $this->getAttribute('entity_id');
+                else return $this->getAttribute('base_id');
 
                 break;
 
@@ -202,7 +202,7 @@ class InheritableModel extends Model
     }
     public function model_as($entity_class_)
     {
-        return EloquentInheritance::getWithEntityID($this->entity_id, $entity_class_);
+        return EloquentInheritance::getWithBaseId($this->base_id, $entity_class_);
     }
     // given attributes are optional and just for when the object is created but not yet saved to database
 
@@ -222,17 +222,17 @@ class InheritableModel extends Model
                 }
                 if($parent_class != self::class)
 
-                    $entity_id_column = 'entity_id';
+                    $base_id_column = 'base_id';
 
-                else $entity_id_column = 'id';
+                else $base_id_column = 'id';
 
-                if($this->hasAttribute('entity_id') && ($entity_id = $this->entity_id))
+                if($this->hasAttribute('base_id') && ($base_id = $this->base_id))
                 {
 //                    $parent_table_name = $parent_class::tableName();
 
-//                    $data = (array) DB::table($parent_table_name)->where($entity_id_column, '=', $entity_id)->first();
+//                    $data = (array) DB::table($parent_table_name)->where($base_id_column, '=', $base_id)->first();
 
-                    $data = ['entity_id' => $entity_id];
+                    $data = [$base_id_column => $base_id];
 
                     if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
@@ -252,7 +252,7 @@ class InheritableModel extends Model
         };
         return $func();
     }
-    public static function getWithEntityID($entity_id, $entity_class = null, $elevate = true)
+    public static function getWithBaseId($base_id, $entity_class = null, $elevate = true)
     {
         if($entity_class === null)
 
@@ -260,9 +260,9 @@ class InheritableModel extends Model
 
         if($entity_class !== self::class)
 
-            $entity = $entity_class::where('entity_id', $entity_id)->first();
+            $entity = $entity_class::where('base_id', $base_id)->first();
 
-        else $entity = $entity_class::where('id', $entity_id)->first();
+        else $entity = $entity_class::where('id', $base_id)->first();
 
         return $entity;
     }
@@ -280,28 +280,30 @@ class InheritableModel extends Model
     }
     public function elevate($attributes = [])
     {
-        $entity_id = $this->entity_id;
+        $base_id = $this->base_id;
         
-        $top_class = EloquentInheritance::topClassWithEntityID($entity_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
+        $top_class = EloquentInheritance::topClassWithBaseId($base_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
         
         $current_class = static::class;
         
         if($current_class !== $top_class)
         {
-            $attributes['entity_id'] = $entity_id;
-        
-            $top_entity = new $top_class($attributes);
-            
-            $entity = $top_entity;
-            
-            while($entity->parent() === null)
-            {
-                if(get_parent_class($entity) === $current_class)
-            
-                    $entity->set_parent($this);
-                
-                else $entity = $entity->parent_model($attributes);
-            }
+            $top_entity = EloquentInheritance::getWithBaseId($base_id, $top_class);
+
+//            $attributes['base_id'] = $base_id;
+//
+//            $top_entity = new $top_class($attributes);
+//
+//            $entity = $top_entity;
+//
+//            while($entity->parent() === null)
+//            {
+//                if(get_parent_class($entity) === $current_class)
+//
+//                    $entity->set_parent($this);
+//
+//                else $entity = $entity->parent_model($attributes);
+//            }
             return $top_entity;
         }
         else return $this;
@@ -599,7 +601,7 @@ class InheritableModel extends Model
 
         foreach($attributes_ as $key_ => $attribute_)
 
-            if(in_array($key_, $recursive_fillable) || \in_array($key_, ['entity_id', 'id', 'top_class']))
+            if(in_array($key_, $recursive_fillable) || \in_array($key_, ['base_id', 'id', 'top_class']))
 
                 $attributes[$key_] = $attribute_;
 
@@ -607,7 +609,7 @@ class InheritableModel extends Model
 
         foreach($attributes as $key => $value)
         {
-            if (!\in_array($key, $fillable) && !\in_array($key, ['entity_id', 'id']))
+            if (!\in_array($key, $fillable) && !\in_array($key, ['base_id', 'id']))
 
                 $not_immediately_fillable[$key] = $value;
 
@@ -623,9 +625,9 @@ class InheritableModel extends Model
 
         $result = parent::fill($immediately_fillable);
 
-        if(isset($immediately_fillable['entity_id']))
+        if(isset($immediately_fillable['base_id']))
             
-            $this->setAttribute('entity_id', $immediately_fillable['entity_id']);
+            $this->setAttribute('base_id', $immediately_fillable['base_id']);
 
         return $result;
     }
@@ -655,7 +657,7 @@ class InheritableModel extends Model
 
         $entity->raw_save();
 
-        $entity_id = $entity->entity_id;
+        $base_id = $entity->base_id;
 
         $save_queue = array_reverse($save_queue);
 
@@ -665,7 +667,7 @@ class InheritableModel extends Model
 
             if($current_class !== self::class)
 
-                $save_item->entity_id = $entity_id;
+                $save_item->base_id = $base_id;
 
             $save_item->raw_save();
         }
@@ -686,7 +688,7 @@ class InheritableModel extends Model
 
             // TODO: Debug this. Does the new entity even have top_class / parent classes registered?
 
-            Cache::forever('#' . $this->entity_id, $this->top_class);
+            Cache::forever('#' . $this->base_id, $this->top_class);
         }
 
         if ($saved) $this->finishSave($options);
@@ -717,7 +719,7 @@ class InheritableModel extends Model
 
             if($parent_model == null)
             {
-                Cache::forget('#' . $this->entity_id);
+                Cache::forget('#' . $this->base_id);
 
                 return true;
             }

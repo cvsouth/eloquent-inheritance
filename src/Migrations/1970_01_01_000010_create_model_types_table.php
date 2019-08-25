@@ -12,7 +12,7 @@ class CreateModelTypesTable extends Migration
     {
         Schema::create('model_types', function (Blueprint $table)
         {
-            $table->bigInteger('entity_id')->unsigned();
+            $table->bigInteger('base_id')->unsigned()->index();
             
             $table->bigIncrements('id');
            

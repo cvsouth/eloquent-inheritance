@@ -4,13 +4,13 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Facades\Cache;
 
-class ModelType extends Entity
+class ModelType extends InheritableModel
 {
-    public static $name = 'Entity Type';
+    public static $name = 'Model Type';
    
-    public static $name_plural = 'Entity Types';
+    public static $name_plural = 'Model Types';
 
-    public $table = "entity_types";
+    public $table = "model_types";
 
     protected $fillable =
     [
@@ -69,13 +69,13 @@ class ModelType extends Entity
 
         $entity_class = $entity_type->entity_class;
 
-        if($entity_class === Entity::class || $entity_class === ModelType::class)
+        if($entity_class === InheritableModel::class || $entity_class === ModelType::class)
             
             return [];
 
         $parents = [];
 
-        $end_class = $include_entity ? Model::class : Entity::class;
+        $end_class = $include_entity ? Model::class : InheritableModel::class;
 
         while(($entity_class = get_parent_class($entity_class)) !== $end_class)
             

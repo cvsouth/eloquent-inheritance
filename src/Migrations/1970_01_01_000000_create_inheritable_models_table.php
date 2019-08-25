@@ -10,7 +10,7 @@ class CreateInheritableModelsTable extends Migration
 {
     public function up()
     {
-        Schema::create('inheritable_models', function (Blueprint $table)
+        Schema::create('base_models', function (Blueprint $table)
         {
             $table->bigIncrements('id');
             
@@ -19,6 +19,6 @@ class CreateInheritableModelsTable extends Migration
     }
     public function down()
     {
-        Schema::drop('inheritable_models');
+        Schema::drop('base_models');
     }
 }
