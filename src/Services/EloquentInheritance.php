@@ -25,7 +25,7 @@ class EloquentInheritance
             
             if($top_class)
 
-                Cache::forever('#' . $model->id, $model->top_class);
+                Cache::forever('#' . $base_id, $top_class);
             
             return $top_class;
         }
