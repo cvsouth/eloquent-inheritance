@@ -270,10 +270,10 @@ class InheritableModel extends Model
     {
         return $entity_class::where('id', $id)->first();
     }
-    public function parent()
-    {
-        return $this->parent_;
-    }
+//    public function parent()
+//    {
+//        return $this->parent_;
+//    }
     public function set_parent($entity)
     {
         $this->parent_ = $entity;
