@@ -32,8 +32,6 @@ class InheritableModel extends BaseModel
 
     public $timestamps = false;
 
-    protected $loaded = [];
-
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
@@ -148,29 +146,9 @@ class InheritableModel extends BaseModel
     {
         return $this->base_id;
     }
-    public function fetchLocalAttributes()
+    public function __get($key)
     {
-        $table = static::tableName();
-        
-        $base_id = $this->getBaseId();
-        
-        $attributes_array = $this->fillable;
-        
-        $attributes_array[] = 'id';
-
-        $data = (array) DB::table($table)->where('base_id', '=', $base_id)->first();
-
-        foreach($data as $key => $value)
-        
-            if(in_array($key, $attributes_array))
-            
-                $this->setAttribute($key, $value);
-
-        return true;
-    }
-    public function __get($attr_)
-    {
-        switch($attr_)
+        switch($key)
         {
             case 'base_id':
 
@@ -198,29 +176,13 @@ class InheritableModel extends BaseModel
 
                 return $this->getRecursiveColumns(); break;
 
-            case 'fields':
-
-                return $this->getRecursiveFields(); break;
-
             default:
 
-                $attr = $this->getAttribute($attr_);
+                if($this->hasAttribute($key) || static::class === self::class)
 
-                if(static::class === self::class)
+                    return $this->getAttribute($key);
 
-                    return $attr;
-
-                else if($attr === null && !$this->hasAttribute($attr_))
-
-                    return $this->parent_model()->$attr_;
-            
-                else if($attr === null && !array_key_exists($attr_, $this->attributesToArray()))
-                {
-                    $this->fetchLocalAttributes();
-
-                    return $this->getAttribute($attr_);
-                }
-                else return $attr;
+                else $this->parent_model()->$key;
         }
     }
     public function id_as($entity_class_)
@@ -433,6 +395,7 @@ class InheritableModel extends BaseModel
         if(Cache::has($cache_key))
 
             return Cache::get($cache_key);
+        
         else
         {
             $dates = [];
@@ -632,7 +595,7 @@ class InheritableModel extends BaseModel
 
         else
         {
-            $has_attribute = Schema::hasColumn($this->getTable(), $key);
+            $has_attribute = Schema::hasColumn($this->getTable(), $key) || Schema::hasColumn($this->getTable(), $key . '_id');
 
             Cache::forever($cache_key, $has_attribute);
 
