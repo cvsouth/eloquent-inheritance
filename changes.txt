@@ -1,9 +1,0 @@
-
-Entity::GetWithBaseId becomes Entities::getWithBaseId
-
-Entity::GetWithID becomes Entities::getWithID
-
-Entity::ElevateMultiple becomes Entities::elevateMultiple
-
-Entity::TableName becomes Entity::tableName
-

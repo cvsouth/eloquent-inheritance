@@ -107,6 +107,47 @@ class InheritableModel extends Model
             return $entity;
         });
     }
+    public static function topClassWithBaseId($base_id)
+    {
+        $cache_key = '#' . $base_id;
+
+        if(Cache::has($cache_key))
+
+            return Cache::get($cache_key);
+
+        else
+        {
+            $top_class = DB
+
+                ::table(InheritableModel::tableName())
+
+                ->where('id', '=', $base_id)
+
+                ->value('top_class');
+
+            if($top_class)
+
+                Cache::forever('#' . $base_id, $top_class);
+
+            return $top_class;
+        }
+    }
+    public static function elevateMultiple($entities)
+    {
+        // TODO: always fetch top class values, in grouped queries
+
+        $is_collection = $entities instanceof Collection;
+
+        $elevated_entities = [];
+
+        foreach($entities as $i => $entity)
+
+            $elevated_entities[$i] = $entity->elevate();
+
+        if($is_collection) $elevated_entities = collect($elevated_entities);
+
+        return $elevated_entities;
+    }
     public function getBaseId()
     {
         return $this->base_id;
@@ -200,10 +241,6 @@ class InheritableModel extends Model
 
         return $entity->id;
     }
-    public function model_as($entity_class_)
-    {
-        return EloquentInheritance::getWithBaseId($this->base_id, $entity_class_);
-    }
     // given attributes are optional and just for when the object is created but not yet saved to database
 
     protected function parent_model($given_attributes = [])
@@ -252,58 +289,22 @@ class InheritableModel extends Model
         };
         return $func();
     }
-    public static function getWithBaseId($base_id, $entity_class = null, $elevate = true)
-    {
-        if($entity_class === null)
-
-            $entity_class = self::class;
-
-        if($entity_class !== self::class)
-
-            $entity = $entity_class::where('base_id', $base_id)->first();
-
-        else $entity = $entity_class::where('id', $base_id)->first();
-
-        return $entity;
-    }
-    public static function getWithID($entity_class, $id)
-    {
-        return $entity_class::where('id', $id)->first();
-    }
-//    public function parent()
-//    {
-//        return $this->parent_;
-//    }
-    public function set_parent($entity)
-    {
-        $this->parent_ = $entity;
-    }
-    public function elevate($attributes = [])
+    public function elevate()
     {
         $base_id = $this->base_id;
         
-        $top_class = EloquentInheritance::topClassWithBaseId($base_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
+        $top_class = self::topClassWithBaseId($base_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
         
         $current_class = static::class;
         
         if($current_class !== $top_class)
         {
-            $top_entity = EloquentInheritance::getWithBaseId($base_id, $top_class);
+            if($top_class != InheritableModel::class)
 
-//            $attributes['base_id'] = $base_id;
-//
-//            $top_entity = new $top_class($attributes);
-//
-//            $entity = $top_entity;
-//
-//            while($entity->parent() === null)
-//            {
-//                if(get_parent_class($entity) === $current_class)
-//
-//                    $entity->set_parent($this);
-//
-//                else $entity = $entity->parent_model($attributes);
-//            }
+                $top_entity = $top_class::where('base_id', $base_id)->first();
+
+            else $top_entity = $top_class::where('id', $base_id)->first();
+
             return $top_entity;
         }
         else return $this;
@@ -319,22 +320,6 @@ class InheritableModel extends Model
     public function getHidden()
     {
         return $this->hidden ?? [];
-    }
-    public function getColumns()
-    {
-        return $this->columns ?? [];
-    }
-    public function getHiddenColumns()
-    {
-        return $this->hidden_columns ?? [];
-    }
-    public function getFields()
-    {
-        return $this->fields ?? [];
-    }
-    public function getHiddenFields()
-    {
-        return $this->hidden_fields ?? [];
     }
     public function getDates()
     {
@@ -479,116 +464,6 @@ class InheritableModel extends Model
             return $dates;
         }
     }
-    public function getRecursiveFields()
-    {
-        $cache_key = 'Entity__getRecursiveFields__' . static::class;
-
-        if(Cache::has($cache_key))
-
-            return Cache::get($cache_key);
-
-        else
-        {
-            $fields = [];
-
-            $chain = [];
-
-            $entity = $this;
-
-            while($entity !== null && \get_class($entity) !== self::class)
-            {
-                $chain[] = $entity;
-
-                $entity = $entity->parent_model();
-            }
-            $chain = array_reverse($chain);
-
-            foreach($chain as $item)
-            {
-                $fields_ = $item->getFields();
-
-                $hidden_fields_ = $item->getHiddenFields();
-
-                $fields = array_diff($fields, $fields_);
-
-                $fields = \array_merge($fields, $fields_);
-
-                $fields = array_diff($fields, $hidden_fields_);
-            }
-            $fields = array_unique($fields);
-
-            $fields = $this->assumeColumnPrefixing($fields);
-
-            Cache::forever($cache_key, $fields);
-
-            return $fields;
-        }
-    }
-    public function getRecursiveColumns()
-    {
-        $cache_key = 'Entity__getRecursiveColumns__' . static::class;
-
-        if(Cache::has($cache_key))
-
-            return Cache::get($cache_key);
-
-        else
-        {
-            $columns = [];
-
-            $chain = [];
-
-            $entity = $this;
-
-            while($entity !== null && \get_class($entity) !== self::class)
-            {
-                $chain[] = $entity;
-
-                $entity = $entity->parent_model();
-            }
-            $chain = array_reverse($chain);
-
-            foreach($chain as $item)
-            {
-                $columns_ = $item->getColumns();
-
-                $hidden_columns_ = $item->getHiddenColumns();
-
-                $columns = array_diff($columns, $columns_);
-
-                $columns = \array_merge($columns, $columns_);
-
-                $columns = array_diff($columns, $hidden_columns_);
-            }
-            $columns = array_unique($columns);
-
-            $columns = $this->assumeColumnPrefixing($columns);
-
-            Cache::forever($cache_key, $columns);
-
-            return $columns;
-        }
-    }
-    public function assumeColumnPrefixing($identifiers, $type = null)
-    {
-        if($type === null)
-
-            $type = ModelType::From(static::class);
-
-        $entity_class = $type->entity_class;
-
-        $phantom = new $entity_class;
-
-        foreach($identifiers as $i => $identifier)
-
-            if(!strpos($identifier, ':'))
-            {
-                $table = $phantom->tableForAttribute($identifier);
-
-                $identifiers[$i] = ColumnType::STANDARD . ':' . $table . ':' . $identifier;
-            }
-        return $identifiers;
-    }
     public function fill(array $attributes_)
     {
         $immediately_fillable = [];
@@ -630,12 +505,6 @@ class InheritableModel extends Model
             $this->setAttribute('base_id', $immediately_fillable['base_id']);
 
         return $result;
-    }
-    public function attributeEntity($attribute_name)
-    {
-        $attribute_name = preg_replace('/_id$/', '', $attribute_name);
-
-        return $this->{$attribute_name};
     }
     public function save(array $options = [])
     {
@@ -726,14 +595,13 @@ class InheritableModel extends Model
             else return $parent_model->delete();
         }
     }
-
     public static function tableName($field_name = null)
     {
-        return with(new static)->table_name($field_name);
+        return with(new static)->getTableName($field_name);
     }
-    public function table_name($field_name = null)
+    public function getTableName($field_name = null)
     {
-        $cache_key = 'Entity__table_name__' . static::class . '__' . $field_name;
+        $cache_key = 'Entity__getTableName__' . static::class . '__' . $field_name;
 
         if(Cache::has($cache_key))
 
