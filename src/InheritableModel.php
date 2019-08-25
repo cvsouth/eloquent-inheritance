@@ -1,10 +1,6 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
-use Cvsouth\EloquentInheritance\Facades\EloquentInheritance;
-
-use Cvsouth\EloquentInheritance\Enums\ColumnType;
-
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Support\Collection;
 
@@ -18,7 +14,7 @@ use Illuminate\Support\Facades\Schema;
 
 use Exception;
 
-class InheritableModel extends Model
+class InheritableModel extends BaseModel
 {
     public static $name = 'Inheritable Model';
 
@@ -44,13 +40,13 @@ class InheritableModel extends Model
     }
     public function newEloquentBuilder($query)
     {
-        return new InheritableBuilder($query);
+        return new Builder($query);
     }
     protected function newBaseQueryBuilder()
     {
         $connection = $this->getConnection();
 
-        return new InheritableQueryBuilder($connection, $connection->getQueryGrammar(), $connection->getPostProcessor());
+        return new QueryBuilder($connection, $connection->getQueryGrammar(), $connection->getPostProcessor());
     }
     public function __set($key, $value)
     {
@@ -251,7 +247,7 @@ class InheritableModel extends Model
             {
                 $parent_class = get_parent_class($this);
 
-                if($parent_class == Model::class)
+                if($parent_class == BaseModel::class)
                 {
                     $this->parent_ = false;
 

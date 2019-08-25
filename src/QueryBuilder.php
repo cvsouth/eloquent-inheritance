@@ -1,12 +1,12 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as BaseModel;
 
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Query\Builder as BaseQueryBuilder;
 
 use Illuminate\Pagination\Paginator;
 
-class InheritableQueryBuilder extends QueryBuilder
+class QueryBuilder extends BaseQueryBuilder
 {
     private $model = null;
 
@@ -18,7 +18,7 @@ class InheritableQueryBuilder extends QueryBuilder
 
         return $query;
     }
-    public function setModel(Model $model)
+    public function setModel(BaseModel $model)
     {
         $this->model = $model;
     }

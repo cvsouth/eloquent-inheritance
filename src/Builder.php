@@ -1,12 +1,12 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as BaseBuilder;
 
 use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Pagination\Paginator;
 
-class InheritableBuilder extends Builder
+class Builder extends BaseBuilder
 {
     public function setModel(Model $model)
     {
