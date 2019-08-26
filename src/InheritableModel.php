@@ -227,7 +227,7 @@ class InheritableModel extends BaseModel
 
                     return $this->getAttribute($key);
 
-                else $this->parent_model()->$key;
+                else return $this->parent_model()->$key;
         }
     }
     public function id_as($entity_class_)
@@ -264,11 +264,9 @@ class InheritableModel extends BaseModel
 
                 if($this->hasAttribute('common_id') && ($common_id = $this->common_id))
                 {
-//                    $parent_table_name = $parent_class::tableName();
+                    $parent_table_name = $parent_class::tableName();
 
-//                    $data = (array) DB::table($parent_table_name)->where($common_id_column, '=', $common_id)->first();
-
-                    $data = [$common_id_column => $common_id];
+                    $data = (array) DB::table($parent_table_name)->where($common_id_column, '=', $common_id)->first();
 
                     if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
