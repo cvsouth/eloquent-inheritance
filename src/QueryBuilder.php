@@ -97,9 +97,9 @@ class QueryBuilder extends BaseQueryBuilder
            
                         return $column;
             }
-            $base_id_column = (($table === $entity_model->table_name()) ? ($table . ".id") : ($table . ".base_id"));
+            $common_id_column = (($table === $entity_model->table_name()) ? ($table . ".id") : ($table . ".common_id"));
             
-            $this->join($table, $base_id_column, "=", $this->from . ".base_id");
+            $this->join($table, $common_id_column, "=", $this->from . ".common_id");
         }
         return $column;
     }

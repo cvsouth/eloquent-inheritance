@@ -36,7 +36,7 @@ class Bird extends Animal
 }
 ```
 
-When creating your migrations add `base_id`:
+When creating your migrations add `common_id`:
 
 ```php
 class CreateAnimalsTable extends Migration
@@ -46,7 +46,7 @@ class CreateAnimalsTable extends Migration
         Schema::create('animals', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('base_id')->index();
+            $table->bigUnsignedInteger('common_id')->index();
             $table->string('species', 250);
             $table->string('name', 250)->nullable();
         });
@@ -67,7 +67,7 @@ class CreateBirdsTable extends Migration
         Schema::create('birds', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('base_id')->index();
+            $table->bigUnsignedInteger('common_id')->index();
             $table->boolean('flying');
         });
     }
@@ -120,11 +120,11 @@ echo $bird->id_as(Animal::class);
 echo $bird->id_as(Bird::class);
 ```
 
-Or use the `base_id` property to get the entities common ID:
+Or use the `common_id` property to get the entities common ID:
 
 ```php
 // The entity's common ID
-echo $bird->base_id
+echo $bird->common_id
 ```
 
 ### Relationships
@@ -156,7 +156,7 @@ class CreateTrainersTable extends Migration
         Schema::create('trainers', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('base_id')->index();
+            $table->bigUnsignedInteger('common_id')->index();
             $table->string('name', 250)->nullable();
             $table->bigInteger('animal_id')->unsigned();
         });

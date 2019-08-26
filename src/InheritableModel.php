@@ -28,7 +28,7 @@ class InheritableModel extends BaseModel
 
     public $table = 'base_models';
 
-    protected $fillable = ['id', 'top_class', 'base_id'];
+    protected $fillable = [];
 
     protected $guarded = [];
 
@@ -54,7 +54,7 @@ class InheritableModel extends BaseModel
     }
     public function __set($key, $value)
     {
-        if($key == 'base_id')
+        if($key == 'common_id')
         {
             if(static::class == self::class)
 
@@ -107,9 +107,9 @@ class InheritableModel extends BaseModel
             return $entity;
         });
     }
-    public static function topClassWithBaseId($base_id)
+    public static function topClassWithCommonId($common_id)
     {
-        $cache_key = '#' . $base_id;
+        $cache_key = '#' . $common_id;
 
         if(Cache::has($cache_key))
 
@@ -121,21 +121,19 @@ class InheritableModel extends BaseModel
 
                 ::table(InheritableModel::tableName())
 
-                ->where('id', '=', $base_id)
+                ->where('id', '=', $common_id)
 
                 ->value('top_class');
 
             if($top_class)
 
-                Cache::forever('#' . $base_id, $top_class);
+                Cache::forever('#' . $common_id, $top_class);
 
             return $top_class;
         }
     }
     public static function elevateMultiple($models)
     {
-        // TODO: always fetch top class values, in grouped queries
-
         $is_collection = $models instanceof Collection;
 
         // group into model types
@@ -144,11 +142,11 @@ class InheritableModel extends BaseModel
 
         foreach($models as $model)
         {
-            $base_id = $model->base_id;
+            $common_id = $model->common_id;
 
             $class = get_class($model);
 
-            $top_class = self::topClassWithBaseId($base_id);
+            $top_class = self::topClassWithCommonId($common_id);
 
             if($class !== $top_class)
             {
@@ -156,7 +154,7 @@ class InheritableModel extends BaseModel
 
                     $groups[$top_class] = [];
 
-                $groups[$top_class][] = $base_id;
+                $groups[$top_class][] = $common_id;
             }
         }
         // elevate in groups
@@ -165,11 +163,11 @@ class InheritableModel extends BaseModel
 
         foreach($groups as $top_class => $group)
         {
-            $elevation = $top_class::whereIn('base_id', $group)->get();
+            $elevation = $top_class::whereIn('common_id', $group)->get();
 
             foreach($elevation as $model)
 
-                $elevated[$model->base_id] = $model;
+                $elevated[$model->common_id] = $model;
         }
         // reorder collection
 
@@ -177,11 +175,11 @@ class InheritableModel extends BaseModel
 
         foreach($models as $i => $model)
         {
-            $base_id = $model->base_id;
+            $common_id = $model->common_id;
 
-            if(isset($elevated[$base_id]))
+            if(isset($elevated[$common_id]))
 
-                $elevated_models[] = $elevated[$base_id];
+                $elevated_models[] = $elevated[$common_id];
 
             else $elevated_models[] = $model;
         }
@@ -189,21 +187,21 @@ class InheritableModel extends BaseModel
 
         return $elevated_models;
     }
-    public function getBaseId()
+    public function getCommonId()
     {
-        return $this->base_id;
+        return $this->common_id;
     }
     public function __get($key)
     {
         switch($key)
         {
-            case 'base_id':
+            case 'common_id':
 
                 if(static::class === self::class)
 
                     return $this->id;
 
-                else return $this->getAttribute('base_id');
+                else return $this->getAttribute('common_id');
 
                 break;
 
@@ -234,10 +232,6 @@ class InheritableModel extends BaseModel
     }
     public function id_as($entity_class_)
     {
-        if($entity_class_ === null)
-
-            throw new Exception('InheritableModel::id_as() called without entity_class being specified (NULL)');
-
         $entity = $this;
 
         while(($entity_class = \get_class($entity)) !== $entity_class_ && $entity_class !== self::class)
@@ -264,17 +258,17 @@ class InheritableModel extends BaseModel
                 }
                 if($parent_class != self::class)
 
-                    $base_id_column = 'base_id';
+                    $common_id_column = 'common_id';
 
-                else $base_id_column = 'id';
+                else $common_id_column = 'id';
 
-                if($this->hasAttribute('base_id') && ($base_id = $this->base_id))
+                if($this->hasAttribute('common_id') && ($common_id = $this->common_id))
                 {
 //                    $parent_table_name = $parent_class::tableName();
 
-//                    $data = (array) DB::table($parent_table_name)->where($base_id_column, '=', $base_id)->first();
+//                    $data = (array) DB::table($parent_table_name)->where($common_id_column, '=', $common_id)->first();
 
-                    $data = [$base_id_column => $base_id];
+                    $data = [$common_id_column => $common_id];
 
                     if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
@@ -296,9 +290,9 @@ class InheritableModel extends BaseModel
     }
     public function elevate()
     {
-        $base_id = $this->base_id;
+        $common_id = $this->common_id;
         
-        $top_class = self::topClassWithBaseId($base_id); // TODO: Try using inline code instead of Service call at high volume and whether it is better to do that for performance reasons
+        $top_class = self::topClassWithCommonId($common_id);
         
         $current_class = static::class;
         
@@ -306,9 +300,9 @@ class InheritableModel extends BaseModel
         {
             if($top_class !== self::class)
 
-                $top_entity = $top_class::where('base_id', $base_id)->first();
+                $top_entity = $top_class::where('common_id', $common_id)->first();
 
-            else $top_entity = $top_class::where('id', $base_id)->first();
+            else $top_entity = $top_class::where('id', $common_id)->first();
 
             return $top_entity;
         }
@@ -332,7 +326,7 @@ class InheritableModel extends BaseModel
     }
     public function getColumns()
     {
-        $cache_key = 'Entity__getFields__' . static::class;
+        $cache_key = self::class . '__getFields__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -357,7 +351,7 @@ class InheritableModel extends BaseModel
     }
     public function getRecursiveHidden()
     {
-        $cache_key = 'Entity__getRecursiveHidden__' . static::class;
+        $cache_key = self::class . '__getRecursiveHidden__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -392,7 +386,7 @@ class InheritableModel extends BaseModel
     }
     public function getRecursiveFillable()
     {
-        $cache_key = 'Entity__getRecursiveFillable__' . static::class;
+        $cache_key = self::class . '__getRecursiveFillable__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -427,7 +421,7 @@ class InheritableModel extends BaseModel
     }
     public function getRecursiveColumns()
     {
-        $cache_key = 'Entity__getRecursiveColumns__' . static::class;
+        $cache_key = self::class . '__getRecursiveColumns__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -462,7 +456,7 @@ class InheritableModel extends BaseModel
     }
     public function getRecursiveGuarded()
     {
-        $cache_key = 'Entity__getRecursiveGuarded__' . static::class;
+        $cache_key = self::class . '__getRecursiveGuarded__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -497,7 +491,7 @@ class InheritableModel extends BaseModel
     }
     public function getRecursiveDates()
     {
-        $cache_key = 'Entity__getRecursiveDates__' . static::class;
+        $cache_key = self::class . '__getRecursiveDates__' . static::class;
 
         if(Cache::has($cache_key))
 
@@ -542,7 +536,7 @@ class InheritableModel extends BaseModel
 
         foreach($attributes_ as $key_ => $attribute_)
 
-            if(in_array($key_, $recursive_columns) || \in_array($key_, ['base_id', 'id', 'top_class']))
+            if(in_array($key_, $recursive_columns) || \in_array($key_, ['common_id', 'id', 'top_class']))
 
                 $attributes[$key_] = $attribute_;
 
@@ -550,7 +544,7 @@ class InheritableModel extends BaseModel
 
         foreach($attributes as $key => $value)
         {
-            if (!\in_array($key, $columns) && !\in_array($key, ['base_id', 'id']))
+            if (!\in_array($key, $columns) && !\in_array($key, ['common_id', 'id']))
 
                 $not_immediately_fillable[$key] = $value;
 
@@ -566,9 +560,9 @@ class InheritableModel extends BaseModel
 
         $result = parent::fill($immediately_fillable);
 
-        if(isset($immediately_fillable['base_id']))
+        if(isset($immediately_fillable['common_id']))
             
-            $this->setAttribute('base_id', $immediately_fillable['base_id']);
+            $this->setAttribute('common_id', $immediately_fillable['common_id']);
 
         return $result;
     }
@@ -592,7 +586,7 @@ class InheritableModel extends BaseModel
 
         $entity->raw_save();
 
-        $base_id = $entity->base_id;
+        $common_id = $entity->common_id;
 
         $save_queue = array_reverse($save_queue);
 
@@ -602,7 +596,7 @@ class InheritableModel extends BaseModel
 
             if($current_class !== self::class)
 
-                $save_item->base_id = $base_id;
+                $save_item->common_id = $common_id;
 
             $save_item->raw_save();
         }
@@ -622,12 +616,14 @@ class InheritableModel extends BaseModel
             $saved = $this->performInsert($query);
 
             // TODO: Debug this. Does the new entity even have top_class / parent classes registered?
-
-            Cache::forever('#' . $this->base_id, $this->top_class);
         }
 
-        if ($saved) $this->finishSave($options);
+        if ($saved)
+        {
+            $this->finishSave($options);
 
+            Cache::forever('#' . $this->common_id, $this->top_class);
+        }
         return $saved;
     }
     public function delete()
@@ -654,7 +650,7 @@ class InheritableModel extends BaseModel
 
             if($parent_model == null)
             {
-                Cache::forget('#' . $this->base_id);
+                Cache::forget('#' . $this->common_id);
 
                 return true;
             }
@@ -667,7 +663,7 @@ class InheritableModel extends BaseModel
     }
     public function getTableName($field_name = null)
     {
-        $cache_key = 'Entity__getTableName__' . static::class . '__' . $field_name;
+        $cache_key = self::class . '__getTableName__' . static::class . '__' . $field_name;
 
         if(Cache::has($cache_key))
 
@@ -694,7 +690,7 @@ class InheritableModel extends BaseModel
     }
     public function hasAttribute($key)
     {
-        $cache_key = 'Entity__hasAttribute__' . static::class . '__' . $key;
+        $cache_key = self::class . '__hasAttribute__' . static::class . '__' . $key;
 
         if(Cache::has($cache_key))
 
@@ -765,7 +761,7 @@ class InheritableModel extends BaseModel
     }
     public static function tableClasses()
     {
-        $cache_key = 'Entity__tableClasses';
+        $cache_key = self::class . '__tableClasses';
 
         if(Cache::has($cache_key))
 
