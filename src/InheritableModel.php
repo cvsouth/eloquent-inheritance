@@ -769,13 +769,13 @@ class InheritableModel extends BaseModel
 
         else
         {
-            $models = self::getClasses();
+            $classes = self::getClasses();
 
             $table_classes = [];
 
-            foreach($models as $model)
+            foreach($classes as $class)
             {
-                $table_classes[$model::tableName()] = $model;
+                $table_classes[$class::tableName()] = $class;
             }
             Cache::forever($cache_key, $table_classes);
 
@@ -786,9 +786,9 @@ class InheritableModel extends BaseModel
     {
         $table_classes = self::tableClasses();
         
-        if(isset($table_classes[$table_classes]))
+        if(isset($table_classes[$table_name]))
             
-            return $table_classes[$table_classes];
+            return $table_classes[$table_name];
         
         else return null;
     }
