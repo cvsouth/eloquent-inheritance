@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Schema;
 
 use Exception;
 
+use RecursiveDirectoryIterator;
+
+use RecursiveIteratorIterator;
+
+use RegexIterator;
+
 class InheritableModel extends BaseModel
 {
     public static $name = 'Inheritable Model';
@@ -126,21 +132,62 @@ class InheritableModel extends BaseModel
             return $top_class;
         }
     }
-    public static function elevateMultiple($entities)
+    public static function elevateMultiple($models)
     {
         // TODO: always fetch top class values, in grouped queries
 
-        $is_collection = $entities instanceof Collection;
+        $is_collection = $models instanceof Collection;
 
-        $elevated_entities = [];
+        // group into model types
 
-        foreach($entities as $i => $entity)
+        $groups = [];
 
-            $elevated_entities[$i] = $entity->elevate();
+        foreach($models as $model)
+        {
+            $base_id = $model->base_id;
 
-        if($is_collection) $elevated_entities = collect($elevated_entities);
+            $class = get_class($model);
 
-        return $elevated_entities;
+            $top_class = self::topClassWithBaseId($base_id);
+
+            if($class !== $top_class)
+            {
+                if(!isset($groups[$top_class]))
+
+                    $groups[$top_class] = [];
+
+                $groups[$top_class][] = $base_id;
+            }
+        }
+        // elevate in groups
+
+        $elevated = [];
+
+        foreach($groups as $top_class => $group)
+        {
+            $elevation = $top_class::whereIn('base_id', $group)->get();
+
+            foreach($elevation as $model)
+
+                $elevated[$model->base_id] = $model;
+        }
+        // reorder collection
+
+        $elevated_models = [];
+
+        foreach($models as $i => $model)
+        {
+            $base_id = $model->base_id;
+
+            if(isset($elevated[$base_id]))
+
+                $elevated_models[] = $elevated[$base_id];
+
+            else $elevated_models[] = $model;
+        }
+        if($is_collection) $elevated_models = collect($elevated_models);
+
+        return $elevated_models;
     }
     public function getBaseId()
     {
@@ -257,7 +304,7 @@ class InheritableModel extends BaseModel
         
         if($current_class !== $top_class)
         {
-            if($top_class != InheritableModel::class)
+            if($top_class !== self::class)
 
                 $top_entity = $top_class::where('base_id', $base_id)->first();
 
@@ -282,6 +329,31 @@ class InheritableModel extends BaseModel
     public function getDates()
     {
         return $this->dates ?? [];
+    }
+    public function getColumns()
+    {
+        $cache_key = 'Entity__getFields__' . static::class;
+
+        if(Cache::has($cache_key))
+
+            return Cache::get($cache_key);
+
+        else
+        {
+            $table_name = $this->table;
+
+            $table_columns = DB::connection()->getDoctrineSchemaManager()->listTableColumns($table_name);
+
+            $columns = [];
+
+            foreach($table_columns as $table_column)
+
+                $columns[] = $table_column->getName();
+
+            Cache::forever($cache_key, $columns);
+
+            return $columns;
+        }
     }
     public function getRecursiveHidden()
     {
@@ -351,6 +423,41 @@ class InheritableModel extends BaseModel
             Cache::forever($cache_key, $fillable);
 
             return $fillable;
+        }
+    }
+    public function getRecursiveColumns()
+    {
+        $cache_key = 'Entity__getRecursiveColumns__' . static::class;
+
+        if(Cache::has($cache_key))
+
+            return Cache::get($cache_key);
+
+        else
+        {
+            $columns = [];
+
+            $chain = [];
+
+            $entity = $this;
+
+            while($entity !== null && \get_class($entity) !== self::class)
+            {
+                $chain[] = $entity;
+
+                $entity = $entity->parent_model();
+            }
+            $chain = array_reverse($chain);
+
+            foreach($chain as $item)
+
+                $columns = \array_merge($columns, $item->getColumns());
+
+            $columns = array_unique($columns);
+
+            Cache::forever($cache_key, $columns);
+
+            return $columns;
         }
     }
     public function getRecursiveGuarded()
@@ -431,19 +538,19 @@ class InheritableModel extends BaseModel
 
         $attributes = [];
 
-        $recursive_fillable = $this->getRecursiveFillable();
+        $recursive_columns = $this->getRecursiveColumns();
 
         foreach($attributes_ as $key_ => $attribute_)
 
-            if(in_array($key_, $recursive_fillable) || \in_array($key_, ['base_id', 'id', 'top_class']))
+            if(in_array($key_, $recursive_columns) || \in_array($key_, ['base_id', 'id', 'top_class']))
 
                 $attributes[$key_] = $attribute_;
 
-        $fillable = $this->fillable;
+        $columns = $this->getColumns();
 
         foreach($attributes as $key => $value)
         {
-            if (!\in_array($key, $fillable) && !\in_array($key, ['base_id', 'id']))
+            if (!\in_array($key, $columns) && !\in_array($key, ['base_id', 'id']))
 
                 $not_immediately_fillable[$key] = $value;
 
@@ -601,5 +708,92 @@ class InheritableModel extends BaseModel
 
             return $has_attribute;
         }
+    }
+    private static function getClasses()
+    {
+        $classes = array();
+
+        $allFiles = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path()));
+
+        $phpFiles = new RegexIterator($allFiles, '/\.php$/');
+
+        foreach ($phpFiles as $phpFile)
+        {
+            $path = $phpFile->getRealPath();
+
+            $content = file_get_contents($path);
+
+            if(!instr('public $table', $content)) continue;
+
+            $tokens = token_get_all($content);
+
+            $namespace = '';
+
+            for ($index = 0; isset($tokens[$index]); $index++)
+            {
+                if (!isset($tokens[$index][0]))
+
+                    continue;
+
+                if (T_NAMESPACE === $tokens[$index][0])
+                {
+                    $index += 2; // Skip namespace keyword and whitespace
+
+                    while (isset($tokens[$index]) && is_array($tokens[$index]))
+
+                        $namespace .= $tokens[$index++][1];
+                }
+                if (T_CLASS === $tokens[$index][0] && T_WHITESPACE === $tokens[$index + 1][0] && T_STRING === $tokens[$index + 2][0])
+                {
+                    $index += 2; // Skip class keyword and whitespace
+
+                    $classes[] = [$path, $namespace.'\\'.$tokens[$index][1]];
+
+                    break;
+                }
+            }
+        }
+        $inheritable_models = [];
+
+        foreach($classes as $class)
+        {
+            if(class_exists($class[1]) && is_a($class[1], static::class, true))
+
+                $inheritable_models[] = $class[1];
+        }
+        return $inheritable_models;
+    }
+    public static function tableClasses()
+    {
+        $cache_key = 'Entity__tableClasses';
+
+        if(Cache::has($cache_key))
+
+            return Cache::get($cache_key);
+
+        else
+        {
+            $models = self::getClasses();
+
+            $table_classes = [];
+
+            foreach($models as $model)
+            {
+                $table_classes[$model::tableName()] = $model;
+            }
+            Cache::forever($cache_key, $table_classes);
+
+            return $table_classes;
+        }
+    }
+    public static function classForTableName($table_name)
+    {
+        $table_classes = self::tableClasses();
+        
+        if(isset($table_classes[$table_classes]))
+            
+            return $table_classes[$table_classes];
+        
+        else return null;
     }
 }

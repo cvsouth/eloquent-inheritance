@@ -34,7 +34,7 @@ class QueryBuilder extends BaseQueryBuilder
         {
             $from = $this->from;
            
-            $entity_class = ModelType::FromTableName($from)->entity_class;
+            InheritableModel::classForTableName($from);
             
             $model = new $entity_class;
            
@@ -69,7 +69,7 @@ class QueryBuilder extends BaseQueryBuilder
         {
             // column is part of entity hierarchy?
             
-            if(!in_array($column, $model->getRecursiveFillable())) return $column;
+            if(!in_array($column, $model->getRecursiveColumns())) return $column; // TODO: getRecursiveFields: Build from schema and cache
 
             // get target class/table
             

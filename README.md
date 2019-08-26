@@ -3,7 +3,7 @@
 ## Installation
 
 ```php
-composer require cvsouth/entities
+composer require cvsouth/eloquent-inheritance
 php artisan migrate
 ```
 
@@ -11,10 +11,10 @@ php artisan migrate
 
 ### Defining classes
 
-Extend your models from `Entity` instead of the usual `Model`:
+Extend your models from `InheritableModel` instead of the usual `Model`:
 
 ```php
-class Animal extends Entity
+class Animal extends InheritableModel
 {
     public $table = "animals";
     protected $fillable =
@@ -36,7 +36,7 @@ class Bird extends Animal
 }
 ```
 
-When creating your migrations, include `base_id` and insert a new `ModelType` object:
+When creating your migrations add `base_id`:
 
 ```php
 class CreateAnimalsTable extends Migration
@@ -45,20 +45,16 @@ class CreateAnimalsTable extends Migration
     {
         Schema::create('animals', function (Blueprint $table)
         {
-            $table->increments('id');
-            $table->integer('base_id')->unsigned();
+            $table->bigIncrements('id');
+            $table->bigUnsignedInteger('base_id')->index();
             $table->string('species', 250);
             $table->string('name', 250)->nullable();
         });
-        
-        $entity_type = new ModelType(["entity_class" => Animal::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('animals');
-                
-        $entity_type = ModelType::where("entity_class", Animal::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```
@@ -70,19 +66,15 @@ class CreateBirdsTable extends Migration
     {
         Schema::create('birds', function (Blueprint $table)
         {
-            $table->increments('id');
-            $table->integer('base_id')->unsigned();
+            $table->bigIncrements('id');
+            $table->bigUnsignedInteger('base_id')->index();
             $table->boolean('flying');
         });
-        
-        $entity_type = new ModelType(["entity_class" => Bird::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('birds');
-        
-        $entity_type = ModelType::where("entity_class", Bird::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```
@@ -140,7 +132,7 @@ echo $bird->base_id
 Relationships work like regular eloquent relationships but bear in mind that you can reference specific levels of inheritance. For example:
 
 ```php
-class Trainer extends Entity
+class Trainer extends InheritableModel
 {
     public $table = "trainers";
     protected $fillable =
@@ -163,25 +155,21 @@ class CreateTrainersTable extends Migration
     {
         Schema::create('trainers', function (Blueprint $table)
         {
-            $table->increments('id');
-            $table->integer('base_id')->unsigned();
+            $table->bigIncrements('id');
+            $table->bigUnsignedInteger('base_id')->index();
             $table->string('name', 250)->nullable();
-            $table->integer('animal_id')->unsigned();
+            $table->bigInteger('animal_id')->unsigned();
         });
         
         Schema::table('trainers', function ($table)
         {
             $table->foreign('animal_id')->references('id')->on('animals')->onDelete('cascade');
         });
-        
-        $entity_type = new ModelType(["entity_class" => Trainer::class]); $entity_type->save();
     }
 
     public function down()
     {
         Schema::drop('trainers');
-                
-        $entity_type = ModelType::where("entity_class", Trainer::class)->first(); if($entity_type) ModelType::destroy([$entity_type->id]);
     }
 }
 ```
