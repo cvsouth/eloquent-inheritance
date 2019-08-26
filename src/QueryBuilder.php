@@ -33,10 +33,10 @@ class QueryBuilder extends BaseQueryBuilder
         else
         {
             $from = $this->from;
-           
-            InheritableModel::classForTableName($from);
+
+            $class = InheritableModel::classForTableName($from);
             
-            $model = new $entity_class;
+            $model = new $class;
            
             return $model;
         }
@@ -67,12 +67,8 @@ class QueryBuilder extends BaseQueryBuilder
 
         else
         {
-            // column is part of entity hierarchy?
-            
-            if(!in_array($column, $model->getRecursiveColumns())) return $column; // TODO: getRecursiveFields: Build from schema and cache
+            if(!in_array($column, $model->getRecursiveColumns())) return $column;
 
-            // get target class/table
-            
             $table = $model->tableForAttribute($column);
         }
         // prefix
