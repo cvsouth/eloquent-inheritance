@@ -46,7 +46,7 @@ class CreateAnimalsTable extends Migration
         Schema::create('animals', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('common_id')->index();
+            $table->bigInteger('common_id')->unsigned()->index();
             $table->string('species', 250);
             $table->string('name', 250)->nullable();
         });
@@ -67,7 +67,7 @@ class CreateBirdsTable extends Migration
         Schema::create('birds', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('common_id')->index();
+            $table->bigInteger('common_id')->unsigned()->index();
             $table->boolean('flying');
         });
     }
@@ -156,7 +156,7 @@ class CreateTrainersTable extends Migration
         Schema::create('trainers', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigUnsignedInteger('common_id')->index();
+            $table->bigInteger('common_id')->unsigned()->index();
             $table->string('name', 250)->nullable();
             $table->bigInteger('animal_id')->unsigned();
         });
