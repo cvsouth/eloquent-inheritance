@@ -703,7 +703,7 @@ class InheritableModel extends BaseModel
             return $has_attribute;
         }
     }
-    private static function getClasses()
+    public static function classes()
     {
         $classes = array();
 
@@ -767,7 +767,7 @@ class InheritableModel extends BaseModel
 
         else
         {
-            $classes = self::getClasses();
+            $classes = self::classes();
 
             $table_classes = [];
 
