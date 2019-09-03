@@ -5,9 +5,9 @@
 
     "require": {
 
-        "illuminate/support": "5.6.*|5.7.*|5.8.*",
+        "illuminate/support": "5.8.*|6.0.*",
       
-        "illuminate/database": "5.6.*|5.7.*|5.8.*",
+        "illuminate/database": "5.8.*|6.0.*",
 
         "doctrine/dbal": "^2.8"
     },
