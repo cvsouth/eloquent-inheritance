@@ -120,6 +120,9 @@ $bird->save();
 
 echo $bird->species;
 // Aratinga solstitialis
+
+$bird->speak();
+// AAA!
 ```
 
 ### Querying objects
@@ -130,13 +133,13 @@ Again, you can query the object just like usual for Eloquent:
 $bird = Bird::where("species", "=", "Aratinga solstitialis")->first();
 $bird->fly();
 
-echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying ? "" : "not ") . "flying";
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying";
 // This aratinga solstitialis is flying
 
 $bird->species = 'Sun Conure'
 $bird->land();
 
-echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying ? "" : "not ") . "flying";
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying";
 // This sun conure is not flying
 ```
 
