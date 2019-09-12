@@ -54,7 +54,7 @@ class InheritableModel extends BaseModel
     }
     public function __set($key, $value)
     {
-        if($key == 'common_id')
+        if($key == 'base_id')
         {
             if(static::class == self::class)
 
@@ -70,46 +70,46 @@ class InheritableModel extends BaseModel
     }
     public function tableForAttribute($attr)
     {
-        $entity_class = $this->entityClassForAttribute($attr);
+        $model_class = $this->modelClassForAttribute($attr);
 
-        $result = $entity_class::tableName();
+        $result = $model_class::tableName();
       
         return $result;
     }
-    public function entityClassForAttribute($attr)
+    public function modelClassForAttribute($attr)
     {
-        $entity = $this;
+        $model = $this;
 
         if($attr === 'id') return $this;
 
-        while(!$entity->hasAttribute($attr) && \get_class($entity) !== self::class)
+        while(!$model->hasAttribute($attr) && \get_class($model) !== self::class)
 
-            $entity = $entity->parent_model();
+            $model = $model->parent_model();
 
-        if(($entity_class = \get_class($entity)) === self::class)
+        if(($model_class = \get_class($model)) === self::class)
 
             return $this->hasAttribute($attr);
 
-        else return $entity_class;
+        else return $model_class;
     }
-    public static function createNew($entity_class, array $attributes)
+    public static function createNew($model_class, array $attributes)
     {
-        return static::unguarded(function () use ($entity_class, $attributes)
+        return static::unguarded(function () use ($model_class, $attributes)
         {
-            $entity = new $entity_class;
+            $model = new $model_class;
           
-            $entity->fill($attributes);
+            $model->fill($attributes);
 
             if(isset($attributes['id']))
               
-                $entity->exists = true;
+                $model->exists = true;
 
-            return $entity;
+            return $model;
         });
     }
-    public static function topClassWithCommonId($common_id)
+    public static function topClassWithCommonId($base_id)
     {
-        $cache_key = '#' . $common_id;
+        $cache_key = '#' . $base_id;
 
         if(Cache::has($cache_key))
 
@@ -121,13 +121,13 @@ class InheritableModel extends BaseModel
 
                 ::table(InheritableModel::tableName())
 
-                ->where('id', '=', $common_id)
+                ->where('id', '=', $base_id)
 
                 ->value('top_class');
 
             if($top_class)
 
-                Cache::forever('#' . $common_id, $top_class);
+                Cache::forever('#' . $base_id, $top_class);
 
             return $top_class;
         }
@@ -142,11 +142,11 @@ class InheritableModel extends BaseModel
 
         foreach($models as $model)
         {
-            $common_id = $model->common_id;
+            $base_id = $model->base_id;
 
             $class = get_class($model);
 
-            $top_class = self::topClassWithCommonId($common_id);
+            $top_class = self::topClassWithCommonId($base_id);
 
             if($class !== $top_class)
             {
@@ -154,7 +154,7 @@ class InheritableModel extends BaseModel
 
                     $groups[$top_class] = [];
 
-                $groups[$top_class][] = $common_id;
+                $groups[$top_class][] = $base_id;
             }
         }
         // elevate in groups
@@ -163,11 +163,11 @@ class InheritableModel extends BaseModel
 
         foreach($groups as $top_class => $group)
         {
-            $elevation = $top_class::whereIn('common_id', $group)->get();
+            $elevation = $top_class::whereIn('base_id', $group)->get();
 
             foreach($elevation as $model)
 
-                $elevated[$model->common_id] = $model;
+                $elevated[$model->base_id] = $model;
         }
         // reorder collection
 
@@ -175,11 +175,11 @@ class InheritableModel extends BaseModel
 
         foreach($models as $i => $model)
         {
-            $common_id = $model->common_id;
+            $base_id = $model->base_id;
 
-            if(isset($elevated[$common_id]))
+            if(isset($elevated[$base_id]))
 
-                $elevated_models[] = $elevated[$common_id];
+                $elevated_models[] = $elevated[$base_id];
 
             else $elevated_models[] = $model;
         }
@@ -189,19 +189,19 @@ class InheritableModel extends BaseModel
     }
     public function getCommonId()
     {
-        return $this->common_id;
+        return $this->base_id;
     }
     public function __get($key)
     {
         switch($key)
         {
-            case 'common_id':
+            case 'base_id':
 
                 if(static::class === self::class)
 
                     return $this->id;
 
-                else return $this->getAttribute('common_id');
+                else return $this->getAttribute('base_id');
 
                 break;
 
@@ -230,15 +230,15 @@ class InheritableModel extends BaseModel
                 else return $this->parent_model()->$key;
         }
     }
-    public function id_as($entity_class_)
+    public function id_as($model_class_)
     {
-        $entity = $this;
+        $model = $this;
 
-        while(($entity_class = \get_class($entity)) !== $entity_class_ && $entity_class !== self::class)
+        while(($model_class = \get_class($model)) !== $model_class_ && $model_class !== self::class)
 
-            $entity = $entity->parent_model();
+            $model = $model->parent_model();
 
-        return $entity->id;
+        return $model->id;
     }
     // given attributes are optional and just for when the object is created but not yet saved to database
 
@@ -258,15 +258,15 @@ class InheritableModel extends BaseModel
                 }
                 if($parent_class != self::class)
 
-                    $common_id_column = 'common_id';
+                    $base_id_column = 'base_id';
 
-                else $common_id_column = 'id';
+                else $base_id_column = 'id';
 
-                if($this->hasAttribute('common_id') && ($common_id = $this->common_id))
+                if($this->hasAttribute('base_id') && ($base_id = $this->base_id))
                 {
                     $parent_table_name = $parent_class::tableName();
 
-                    $data = (array) DB::table($parent_table_name)->where($common_id_column, '=', $common_id)->first();
+                    $data = (array) DB::table($parent_table_name)->where($base_id_column, '=', $base_id)->first();
 
                     if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
@@ -288,9 +288,9 @@ class InheritableModel extends BaseModel
     }
     public function elevate()
     {
-        $common_id = $this->common_id;
+        $base_id = $this->base_id;
         
-        $top_class = self::topClassWithCommonId($common_id);
+        $top_class = self::topClassWithCommonId($base_id);
         
         $current_class = static::class;
         
@@ -298,11 +298,11 @@ class InheritableModel extends BaseModel
         {
             if($top_class !== self::class)
 
-                $top_entity = $top_class::where('common_id', $common_id)->first();
+                $top_model = $top_class::where('base_id', $base_id)->first();
 
-            else $top_entity = $top_class::where('id', $common_id)->first();
+            else $top_model = $top_class::where('id', $base_id)->first();
 
-            return $top_entity;
+            return $top_model;
         }
         else return $this;
     }
@@ -361,13 +361,13 @@ class InheritableModel extends BaseModel
 
             $chain = [];
 
-            $entity = $this;
+            $model = $this;
 
-            while($entity !== null && \get_class($entity) !== self::class)
+            while($model !== null && \get_class($model) !== self::class)
             {
-                $chain[] = $entity;
+                $chain[] = $model;
 
-                $entity = $entity->parent_model();
+                $model = $model->parent_model();
             }
             $chain = array_reverse($chain);
 
@@ -396,13 +396,13 @@ class InheritableModel extends BaseModel
 
             $chain = [];
 
-            $entity = $this;
+            $model = $this;
 
-            while($entity !== null && \get_class($entity) !== self::class)
+            while($model !== null && \get_class($model) !== self::class)
             {
-                $chain[] = $entity;
+                $chain[] = $model;
 
-                $entity = $entity->parent_model();
+                $model = $model->parent_model();
             }
             $chain = array_reverse($chain);
 
@@ -431,13 +431,13 @@ class InheritableModel extends BaseModel
 
             $chain = [];
 
-            $entity = $this;
+            $model = $this;
 
-            while($entity !== null && \get_class($entity) !== self::class)
+            while($model !== null && \get_class($model) !== self::class)
             {
-                $chain[] = $entity;
+                $chain[] = $model;
 
-                $entity = $entity->parent_model();
+                $model = $model->parent_model();
             }
             $chain = array_reverse($chain);
 
@@ -466,13 +466,13 @@ class InheritableModel extends BaseModel
 
             $chain = [];
 
-            $entity = $this;
+            $model = $this;
 
-            while($entity !== null && \get_class($entity) !== self::class)
+            while($model !== null && \get_class($model) !== self::class)
             {
-                $chain[] = $entity;
+                $chain[] = $model;
 
-                $entity = $entity->parent_model();
+                $model = $model->parent_model();
             }
             $chain = array_reverse($chain);
 
@@ -501,13 +501,13 @@ class InheritableModel extends BaseModel
 
             $chain = [];
 
-            $entity = $this;
+            $model = $this;
 
-            while($entity !== null && \get_class($entity) !== self::class)
+            while($model !== null && \get_class($model) !== self::class)
             {
-                $chain[] = $entity;
+                $chain[] = $model;
 
-                $entity = $entity->parent_model();
+                $model = $model->parent_model();
             }
             $chain = array_reverse($chain);
 
@@ -534,7 +534,7 @@ class InheritableModel extends BaseModel
 
         foreach($attributes_ as $key_ => $attribute_)
 
-            if(in_array($key_, $recursive_columns) || \in_array($key_, ['common_id', 'id', 'top_class']))
+            if(in_array($key_, $recursive_columns) || \in_array($key_, ['base_id', 'id', 'top_class']))
 
                 $attributes[$key_] = $attribute_;
 
@@ -542,7 +542,7 @@ class InheritableModel extends BaseModel
 
         foreach($attributes as $key => $value)
         {
-            if (!\in_array($key, $columns) && !\in_array($key, ['common_id', 'id']))
+            if (!\in_array($key, $columns) && !\in_array($key, ['base_id', 'id']))
 
                 $not_immediately_fillable[$key] = $value;
 
@@ -550,7 +550,7 @@ class InheritableModel extends BaseModel
         }
         if(\is_array($not_immediately_fillable) && \count($not_immediately_fillable) >= 1)
 
-            // attributes given in case parent entities not created yet. this can occur when an entity is
+            // attributes given in case parent entities not created yet. this can occur when an model is
 
             // created using the new keyword, given attributes pertaining to parents, but has not been saved.
 
@@ -558,9 +558,9 @@ class InheritableModel extends BaseModel
 
         $result = parent::fill($immediately_fillable);
 
-        if(isset($immediately_fillable['common_id']))
+        if(isset($immediately_fillable['base_id']))
             
-            $this->setAttribute('common_id', $immediately_fillable['common_id']);
+            $this->setAttribute('base_id', $immediately_fillable['base_id']);
 
         return $result;
     }
@@ -572,19 +572,19 @@ class InheritableModel extends BaseModel
 
         $save_queue = [];
 
-        $entity = $this;
+        $model = $this;
 
-        while(($current_class = \get_class($entity)) !== self::class)
+        while(($current_class = \get_class($model)) !== self::class)
         {
-            $save_queue[] = $entity;
+            $save_queue[] = $model;
 
-            $entity = $entity->parent_model();
+            $model = $model->parent_model();
         }
-        $entity->__set('top_class', $static_class);
+        $model->__set('top_class', $static_class);
 
-        $entity->raw_save();
+        $model->raw_save();
 
-        $common_id = $entity->common_id;
+        $base_id = $model->base_id;
 
         $save_queue = array_reverse($save_queue);
 
@@ -594,7 +594,7 @@ class InheritableModel extends BaseModel
 
             if($current_class !== self::class)
 
-                $save_item->common_id = $common_id;
+                $save_item->base_id = $base_id;
 
             $save_item->raw_save();
         }
@@ -610,17 +610,13 @@ class InheritableModel extends BaseModel
             $saved = $this->isDirty()?$this->performUpdate($query, $options) : true;
       
         else
-        {
             $saved = $this->performInsert($query);
-
-            // TODO: Debug this. Does the new entity even have top_class / parent classes registered?
-        }
 
         if ($saved)
         {
             $this->finishSave($options);
 
-            Cache::forever('#' . $this->common_id, $this->top_class);
+            Cache::forever('#' . $this->base_id, $this->top_class);
         }
         return $saved;
     }
@@ -648,7 +644,7 @@ class InheritableModel extends BaseModel
 
             if($parent_model == null)
             {
-                Cache::forget('#' . $this->common_id);
+                Cache::forget('#' . $this->base_id);
 
                 return true;
             }

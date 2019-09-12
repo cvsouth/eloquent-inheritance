@@ -22,7 +22,7 @@ class QueryBuilder extends BaseQueryBuilder
     {
         $this->model = $model;
     }
-    public function getEntityClass()
+    public function getModelClass()
     {
         return get_class($this->model());
     }
@@ -57,13 +57,13 @@ class QueryBuilder extends BaseQueryBuilder
 
         $model = $this->model();
       
-        $entity_model = new InheritableModel();
+        $inheritable_model = new InheritableModel();
 
-        if($column === $entity_model->getUpdatedAtColumn()
+        if($column === $inheritable_model->getUpdatedAtColumn()
        
         || $column === "top_class")
 
-            $table = $entity_model->table_name();
+            $table = $inheritable_model->table_name();
 
         else
         {
@@ -93,9 +93,9 @@ class QueryBuilder extends BaseQueryBuilder
            
                         return $column;
             }
-            $common_id_column = (($table === $entity_model->table_name()) ? ($table . ".id") : ($table . ".common_id"));
+            $base_id_column = (($table === $inheritable_model->table_name()) ? ($table . ".id") : ($table . ".base_id"));
             
-            $this->join($table, $common_id_column, "=", $this->from . ".common_id");
+            $this->join($table, $base_id_column, "=", $this->from . ".base_id");
         }
         return $column;
     }

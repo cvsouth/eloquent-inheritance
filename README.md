@@ -17,6 +17,7 @@ Extend your models from `InheritableModel` instead of the usual `Model`:
 class Animal extends InheritableModel
 {
     public $table = "animals";
+    
     protected $fillable =
     [
         'name',
@@ -29,14 +30,30 @@ class Animal extends InheritableModel
 class Bird extends Animal
 {
     public $table = "birds";
+    
     protected $fillable =
     [
         'flying',
     ];
+
+    public function fly()
+    {
+        $this->flying = true;
+    }
+
+    public function land()
+    {
+        $this->flying = false;
+    }
+
+    public function isFlying()
+    {
+        return $this->flying;
+    }
 }
 ```
 
-When creating your migrations add `common_id`:
+When creating your migrations add `base_id`:
 
 ```php
 class CreateAnimalsTable extends Migration
@@ -46,7 +63,7 @@ class CreateAnimalsTable extends Migration
         Schema::create('animals', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigInteger('common_id')->unsigned()->index();
+            $table->bigInteger('base_id')->unsigned()->index();
             $table->string('species', 250);
             $table->string('name', 250)->nullable();
         });
@@ -67,7 +84,7 @@ class CreateBirdsTable extends Migration
         Schema::create('birds', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigInteger('common_id')->unsigned()->index();
+            $table->bigInteger('base_id')->unsigned()->index();
             $table->boolean('flying');
         });
     }
@@ -101,30 +118,37 @@ Again, you can query the object just like usual for Eloquent:
 
 ```php
 $bird = Bird::where("species", "=", "Aratinga solstitialis")->first();
+$bird->fly();
 
-echo "This " . strtolower($bird->species) . " can " . ($bird->flying ? "" : "not ") . "fly";
-// This aratinga solstitialis can fly 
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying ? "" : "not ") . "flying";
+// This aratinga solstitialis is flying
+
+$bird->species = 'Sun Conure'
+$bird->land();
+
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying ? "" : "not ") . "flying";
+// This sun conure is not flying
 ```
 
 ### Primary keys at different levels of inheritance
 
-At each level of inheritance the object has an ID. In the example above, the $bird has an Animal ID as well as a Bird ID. In addition to this each entity has a common ID called Entity ID which is consistent throughout it's class hierarchy.
+At each level of inheritance the object has an id. In the example above, the $bird has an animal id as well as a bird id In addition to this each model has a common id called `base_id` which is consistent throughout it's class hierarchy.
 
-Use the `id_as` method to get the id for an entity at a specific level of inheritance:
+Use the `id_as` method to get the id for a model at a specific level of inheritance:
 
 ```php
-// The entity's Animal ID
+// The model's animal id
 echo $bird->id_as(Animal::class);
 
-// The entity's Bird ID
+// The model's bird id
 echo $bird->id_as(Bird::class);
 ```
 
-Or use the `common_id` property to get the entities common ID:
+Or use the `base_id` property to get the entities base id:
 
 ```php
-// The entity's common ID
-echo $bird->common_id
+// The model's base id
+echo $bird->base_id
 ```
 
 ### Relationships
@@ -156,7 +180,7 @@ class CreateTrainersTable extends Migration
         Schema::create('trainers', function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            $table->bigInteger('common_id')->unsigned()->index();
+            $table->bigInteger('base_id')->unsigned()->index();
             $table->string('name', 250)->nullable();
             $table->bigInteger('animal_id')->unsigned();
         });
