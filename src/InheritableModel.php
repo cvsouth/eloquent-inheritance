@@ -107,7 +107,7 @@ class InheritableModel extends BaseModel
             return $model;
         });
     }
-    public static function topClassWithCommonId($base_id)
+    public static function topClassWithBaseId($base_id)
     {
         $cache_key = '#' . $base_id;
 
@@ -146,7 +146,7 @@ class InheritableModel extends BaseModel
 
             $class = get_class($model);
 
-            $top_class = self::topClassWithCommonId($base_id);
+            $top_class = self::topClassWithBaseId($base_id);
 
             if($class !== $top_class)
             {
@@ -187,7 +187,7 @@ class InheritableModel extends BaseModel
 
         return $elevated_models;
     }
-    public function getCommonId()
+    public function getBaseId()
     {
         return $this->base_id;
     }
@@ -290,7 +290,7 @@ class InheritableModel extends BaseModel
     {
         $base_id = $this->base_id;
         
-        $top_class = self::topClassWithCommonId($base_id);
+        $top_class = self::topClassWithBaseId($base_id);
         
         $current_class = static::class;
         
