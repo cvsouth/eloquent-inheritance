@@ -217,6 +217,6 @@ $trainer = new Trainer
 ]);
 $trainer->save();
 
-echo gettype($trainer->animal); // Bird
-echo $trainer->animal->species; // Aratinga solstitialis
+echo class_basename($trainer->animal); // Bird
+echo $trainer->animal->species; // Sun Conure
 ```
