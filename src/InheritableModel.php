@@ -673,7 +673,7 @@ class InheritableModel extends BaseModel
 
                     throw new Exception('Could not find field ' . $field_name . ', reached the top of the parent tree for ' . static::class . '.');
 
-                $table_name = $parent->table_name($field_name);
+                $table_name = $parent->tableName($field_name);
             }
             else $table_name = with(new static)->getTable();
 

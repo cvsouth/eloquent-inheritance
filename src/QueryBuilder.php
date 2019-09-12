@@ -63,7 +63,7 @@ class QueryBuilder extends BaseQueryBuilder
        
         || $column === "top_class")
 
-            $table = $inheritable_model->table_name();
+            $table = $inheritable_model->tableName();
 
         else
         {
@@ -93,7 +93,7 @@ class QueryBuilder extends BaseQueryBuilder
            
                         return $column;
             }
-            $base_id_column = (($table === $inheritable_model->table_name()) ? ($table . ".id") : ($table . ".base_id"));
+            $base_id_column = (($table === $inheritable_model->tableName()) ? ($table . ".id") : ($table . ".base_id"));
             
             $this->join($table, $base_id_column, "=", $this->from . ".base_id");
         }

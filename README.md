@@ -113,15 +113,20 @@ You can then use your objects just like normal Eloquent objects:
 ```php
 $bird = new Bird
 ([
-   "species" => "Aratinga solstitialis", // Note: This attribute is inherited from Animal
+    "species" => "Aratinga solstitialis", // Note: This attribute is inherited from Animal
 ]);
+
+$bird->fly();
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying" . '<br/>';
+// This aratinga solstitialis is flying
+
+$bird->species = 'Sun Conure';
+
 $bird->save();
 
-echo $bird->species;
-// Aratinga solstitialis
-
-$bird->speak();
-// AAA!
+$bird->land();
+echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying" . '<br/>';
+// This sun conure is not flying
 ```
 
 ### Querying objects
@@ -130,16 +135,9 @@ Again, you can query the object just like usual for Eloquent:
 
 ```php
 $bird = Bird::where("species", "=", "Aratinga solstitialis")->first();
-$bird->fly();
 
-echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying";
-// This aratinga solstitialis is flying
-
-$bird->species = 'Sun Conure'
-$bird->land();
-
-echo "This " . strtolower($bird->species) . " is " . ($bird->isFlying() ? "" : "not ") . "flying";
-// This sun conure is not flying
+$bird->speak();
+// AAA!
 ```
 
 ### Primary keys at different levels of inheritance
