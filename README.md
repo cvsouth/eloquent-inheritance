@@ -23,6 +23,11 @@ class Animal extends InheritableModel
         'name',
         'species',
     ];
+    
+    public function speak()
+    {
+        print($this->name . ' makes a noise');
+    }
 }
 ```
 
@@ -35,6 +40,11 @@ class Bird extends Animal
     [
         'flying',
     ];
+
+    public function speak()
+    {
+        print('AAA!');
+    }
 
     public function fly()
     {
