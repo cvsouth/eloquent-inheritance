@@ -114,7 +114,6 @@ You can then use your objects just like normal Eloquent objects:
 $bird = new Bird
 ([
    "species" => "Aratinga solstitialis", // Note: This attribute is inherited from Animal
-   "flying" => true,
 ]);
 $bird->save();
 
