@@ -95,7 +95,7 @@ class CreateBirdsTable extends Migration
         {
             $table->bigIncrements('id');
             $table->bigInteger('base_id')->unsigned()->index();
-            $table->boolean('flying');
+            $table->boolean('flying')->default(false);
         });
     }
 
