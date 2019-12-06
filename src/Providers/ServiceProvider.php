@@ -1,6 +1,6 @@
-<?php namespace Cvsouth\EloquentInheritance\Providers;
+<?php namespace atroxic\EloquentInheritance\Providers;
 
-use Cvsouth\EloquentInheritance\InheritableModel;
+use atroxic\EloquentInheritance\InheritableModel;
 
 use Illuminate\Foundation\AliasLoader;
 

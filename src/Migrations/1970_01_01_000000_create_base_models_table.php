@@ -6,7 +6,7 @@ use Illuminate\Database\Schema\Blueprint;
 
 use Illuminate\Database\Migrations\Migration;
 
-use Cvsouth\EloquentInheritance\InheritableModel;
+use atroxic\EloquentInheritance\InheritableModel;
 
 class CreateBaseModelsTable extends Migration
 {

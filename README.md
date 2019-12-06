@@ -3,7 +3,7 @@
 ## Installation
 
 ```php
-composer require cvsouth/eloquent-inheritance
+composer require atroxic/eloquent-inheritance
 php artisan migrate
 ```
 

@@ -1,4 +1,4 @@
-<?php namespace Cvsouth\EloquentInheritance;
+<?php namespace atroxic\EloquentInheritance;
 
 use Illuminate\Database\Eloquent\Model as BaseModel;
 

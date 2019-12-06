@@ -1,45 +1,29 @@
 {
-    "name": "cvsouth/eloquent-inheritance",
-
+    "name": "atroxic/eloquent-inheritance",
     "description": "Joined-table inheritance for Laravel",
-
     "require": {
-
-        "illuminate/support": "5.8.*|6.0.*|6.1.*|6.2.*",
-      
-        "illuminate/database": "5.8.*|6.0.*|6.1.*|6.2.*",
-
-        "doctrine/dbal": "^2.8"
+        "laravel/laravel": "^6.6"
     },
     "license": "proprietary",
-
     "authors": [
         {
             "name": "Colin South",
-
             "email": "colin@riseresolution.com"
         }
     ],
     "autoload": {
-
         "psr-4": {
-
-            "Cvsouth\\EloquentInheritance\\": "src/"
+            "atroxic\\EloquentInheritance\\": "src/"
         },
-        "files": [
-        ]
+        "files": []
     },
     "minimum-stability": "dev",
-
-    "extra":
-    {
-        "laravel":
-        {
-            "providers":
-            [
-                "Cvsouth\\EloquentInheritance\\Providers\\ServiceProvider"
+    "extra": {
+        "laravel": {
+            "providers": [
+                "atroxic\\EloquentInheritance\\Providers\\ServiceProvider"
             ]
         }
     },
-    "require-dev": { }
+    "require-dev": {}
 }
