@@ -1,6 +1,6 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
-use Illuminate\Database\Eloquent\Model as BaseModel;
+use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Query\Builder as BaseQueryBuilder;
 
@@ -18,7 +18,7 @@ class QueryBuilder extends BaseQueryBuilder
 
         return $query;
     }
-    public function setModel(BaseModel $model)
+    public function setModel(Model $model)
     {
         $this->model = $model;
     }
