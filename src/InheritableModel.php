@@ -193,8 +193,6 @@ class InheritableModel extends BaseModel
     {
         return $this->base_id;
     }
-    protected $attributes;
-
     public function __get($key)
     {
         switch($key)
@@ -208,10 +206,6 @@ class InheritableModel extends BaseModel
                 else return $this->getAttribute('base_id');
 
                 break;
-
-            case 'attributes':
-
-                return $this->getAttributes(); break;
 
             case 'fillable':
 
@@ -238,13 +232,35 @@ class InheritableModel extends BaseModel
                 else return $this->parent_model()->$key;
         }
     }
-    protected function getArrayableAttributes()
+    public function toArray()
     {
-        $attributes = $this->getAttributes();
-
-        return $this->getArrayableItems($attributes);
+        return array_merge($this->recursiveAttributesToArray(), $this->relationsToArray());
     }
-    public function getAttributes()
+    public function recursiveAttributesToArray()
+    {
+        $attributes = $this->addDateAttributesToArray
+        (
+            $attributes = $this->getRecursiveArrayableAttributes()
+        );
+        $attributes = $this->addMutatedAttributesToArray
+        (
+            $attributes, $mutatedAttributes = $this->getMutatedAttributes()
+        );
+        $attributes = $this->addCastAttributesToArray
+        (
+            $attributes, $mutatedAttributes
+        );
+        foreach($this->getArrayableAppends() as $key)
+        
+            $attributes[$key] = $this->mutateAttributeForArray($key, null);
+        
+        return $attributes;
+    }
+    protected function getRecursiveArrayableAttributes()
+    {
+        return $this->getArrayableItems($this->getRecursiveAttributes());
+    }
+    public function getRecursiveAttributes()
     {
         $columns = $this->getRecursiveColumns();
 
