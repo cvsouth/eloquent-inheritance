@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Schema;
 
+use DateTime;
+
 use Exception;
 
 use RecursiveDirectoryIterator;
@@ -191,6 +193,8 @@ class InheritableModel extends BaseModel
     {
         return $this->base_id;
     }
+    protected $attributes;
+
     public function __get($key)
     {
         switch($key)
@@ -204,6 +208,10 @@ class InheritableModel extends BaseModel
                 else return $this->getAttribute('base_id');
 
                 break;
+
+            case 'attributes':
+
+                return $this->getAttributes(); break;
 
             case 'fillable':
 
@@ -229,6 +237,32 @@ class InheritableModel extends BaseModel
 
                 else return $this->parent_model()->$key;
         }
+    }
+    protected function getArrayableAttributes()
+    {
+        $attributes = $this->getAttributes();
+
+        return $this->getArrayableItems($attributes);
+    }
+    public function toArray()
+    {
+        return array_merge($this->attributesToArray(), $this->relationsToArray());
+    }
+    public function getAttributes()
+    {
+        $columns = $this->getRecursiveColumns();
+
+        $attributes = [];
+
+        foreach($columns as $column)
+        {
+            $value = $this->$column;
+
+            if($value instanceof DateTime) $value = (string) $value;
+
+            $attributes[$column] = $value;
+        }
+        return $attributes;
     }
     public function id_as($model_class_)
     {
