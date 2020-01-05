@@ -244,10 +244,6 @@ class InheritableModel extends BaseModel
 
         return $this->getArrayableItems($attributes);
     }
-    public function toArray()
-    {
-        return array_merge($this->attributesToArray(), $this->relationsToArray());
-    }
     public function getAttributes()
     {
         $columns = $this->getRecursiveColumns();
