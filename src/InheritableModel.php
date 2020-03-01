@@ -834,130 +834,194 @@ class InheritableModel extends BaseModel
     }
     public static function select()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'select', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'select', func_get_args());
     }
     public static function where()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'where', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'where', func_get_args());
     }
     public static function chunk()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'chunk', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'chunk', func_get_args());
     }
     public static function addSelect()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'addSelect', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'addSelect', func_get_args());
     }
     public static function cursor()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'cursor', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'cursor', func_get_args());
     }
     public static function orderByDesc()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'orderByDesc', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'orderByDesc', func_get_args());
     }
     public static function orderByAsc()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'orderByAsc', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'orderByAsc', func_get_args());
     }
     public static function find()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'find', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'find', func_get_args());
     }
     public static function findOrFail()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'findOrFail', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'findOrFail', func_get_args());
     }
     public static function create()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'create', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'create', func_get_args());
     }
     public static function firstOrCreate()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'firstOrCreate', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'firstOrCreate', func_get_args());
     }
     public static function firstOrNew()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'firstOrNew', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'firstOrNew', func_get_args());
     }
     public static function updateOrCreate()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'updateOrCreate', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'updateOrCreate', func_get_args());
     }
     public static function withTrashed()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'withTrashed', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'withTrashed', func_get_args());
     }
     public static function onlyTrashed()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'onlyTrashed', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'onlyTrashed', func_get_args());
     }
     public static function withoutGlobalScope()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'withoutGlobalScope', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'withoutGlobalScope', func_get_args());
     }
     public static function withoutGlobalScopes()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'withoutGlobalScopes', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'withoutGlobalScopes', func_get_args());
     }
     public static function popular()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'popular', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'popular', func_get_args());
     }
     public static function ofType()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'ofType', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'ofType', func_get_args());
     }
     public static function has()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'has', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'has', func_get_args());
     }
     public static function whereHas()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereHas', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereHas', func_get_args());
     }
     public static function whereNull()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereNull', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereNull', func_get_args());
     }
     public static function whereNotNull()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereNotNull', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereNotNull', func_get_args());
     }
     public static function whereIn()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereIn', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereIn', func_get_args());
     }
     public static function doesntHave()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'doesntHave', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'doesntHave', func_get_args());
     }
     public static function whereDoesntHave()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereDoesntHave', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereDoesntHave', func_get_args());
     }
     public static function whereHasMorph()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereHasMorph', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereHasMorph', func_get_args());
     }
     public static function whereDoesntHaveMorph()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'whereDoesntHaveMorph', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'whereDoesntHaveMorph', func_get_args());
     }
     public static function withCount()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'withCount', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'withCount', func_get_args());
     }
     public static function count()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'count', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'count', func_get_args());
     }
     public static function first()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'first', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'first', func_get_args());
     }
     public static function without()
     {
-        $model = new static;return $model->forwardCallTo($model->newQuery(), 'without', func_get_args());
+        $model = new static;
+        
+        return $model->forwardCallTo($model->newQuery(), 'without', func_get_args());
     }
 }
