@@ -29,38 +29,38 @@ class QueryBuilder extends BaseQueryBuilder
     public function model()
     {
         if($this->model !== null) return $this->model;
-        
+
         else
         {
             $from = $this->from;
 
             $class = InheritableModel::classForTableName($from);
-            
+
             $model = new $class;
-           
+
             return $model;
         }
     }
     public function prefixColumn($column, $join_if_necessary = false)
     {
         // ignore wildcards
-        
+
         if($column === "*" || (substr($column, -2) === ".*"))
-        
+
             return $column;
 
         // already prefixed?
-       
+
         if(strpos($column, ".") !== false)
-       
+
             return $column;
 
         $model = $this->model();
-      
+
         $inheritable_model = new InheritableModel();
 
         if($column === $inheritable_model->getUpdatedAtColumn()
-       
+
         || $column === "top_class")
 
             $table = $inheritable_model->tableName();
@@ -72,29 +72,29 @@ class QueryBuilder extends BaseQueryBuilder
             $table = $model->tableForAttribute($column);
         }
         // prefix
-        
+
         $column = $table . "." . $column;
 
         if($table === $this->from)
-     
+
             return $column;
 
         // add to join if necessary
-        
+
         if($join_if_necessary)
         {
             $joins = $this->joins;
-    
+
             if($joins)
             {
                 foreach($joins as $join)
-           
+
                     if($join->table === $table)
-           
+
                         return $column;
             }
             $base_id_column = (($table === $inheritable_model->tableName()) ? ($table . ".id") : ($table . ".base_id"));
-            
+
             $this->join($table, $base_id_column, "=", $this->from . ".base_id");
         }
         return $column;
