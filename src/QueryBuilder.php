@@ -67,7 +67,9 @@ class QueryBuilder extends BaseQueryBuilder
 
         else
         {
-            if(!in_array($column, $model->getRecursiveColumns())) return $column;
+            $recursive_columns = $model->getRecursiveColumns();
+            
+            if(!$recursive_columns || !in_array($column, $recursive_columns)) return $column;
 
             $table = $model->tableForAttribute($column);
         }

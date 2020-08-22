@@ -1,5 +1,6 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
+use Cvsouth\Cloudship\Models\Product;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Support\Collection;
@@ -225,9 +226,11 @@ class InheritableModel extends BaseModel
 
             default:
 
-                if($this->hasAttribute($key) || static::class === self::class)
+                $value = $this->getAttribute($key);
 
-                    return $this->getAttribute($key);
+                if(!empty($value) || static::class === self::class || $this->hasAttribute($key))
+
+                    return $value;
 
                 else return $this->parent_model()->$key;
         }
@@ -263,6 +266,8 @@ class InheritableModel extends BaseModel
     public function getRecursiveAttributes()
     {
         $columns = $this->getRecursiveColumns();
+
+        if($columns === false) return [];
 
         $attributes = [];
 
@@ -371,7 +376,7 @@ class InheritableModel extends BaseModel
     public function getColumns()
     {
         $cache_key = self::class . '__getFields__' . static::class;
-        
+
         if(Cache::has($cache_key))
 
             return Cache::get($cache_key);
@@ -380,17 +385,21 @@ class InheritableModel extends BaseModel
         {
             $table_name = $this->table;
 
-            $table_columns = DB::connection()->getDoctrineSchemaManager()->listTableColumns($table_name);
-
             $columns = [];
 
-            foreach($table_columns as $table_column)
+            if(DB::connection()->getDoctrineSchemaManager()->tablesExist([$table_name]))
+            {
+                $table_columns = DB::connection()->getDoctrineSchemaManager()->listTableColumns($table_name);
 
-                $columns[] = $table_column->getName();
+                foreach($table_columns as $table_column)
 
-            Cache::forever($cache_key, $columns);
+                    $columns[] = $table_column->getName();
 
-            return $columns;
+                Cache::forever($cache_key, $columns);
+
+                return $columns;
+            }
+            else return false;
         }
     }
     public function getRecursiveHidden()
@@ -466,14 +475,16 @@ class InheritableModel extends BaseModel
     public function getRecursiveColumns()
     {
         $cache_key = self::class . '__getRecursiveColumns__' . static::class;
-        
+
         if(Cache::has($cache_key))
 
-            return Cache::get($cache_key);
+             return Cache::get($cache_key);
 
         else
         {
             $columns = $this->getColumns();
+
+            if($columns === false) return false;
 
             $chain = [];
 
@@ -488,8 +499,13 @@ class InheritableModel extends BaseModel
             $chain = array_reverse($chain);
 
             foreach($chain as $item)
+            {
+                $item_columns = $item->getColumns();
 
-                $columns = \array_merge($columns, $item->getColumns());
+                if($item_columns === false) return false;
+
+                $columns = \array_merge($columns, $item_columns);
+            }
 
             $columns = array_unique($columns);
 
@@ -580,11 +596,13 @@ class InheritableModel extends BaseModel
 
         foreach($attributes_ as $key_ => $attribute_)
 
-            if(in_array($key_, $recursive_columns) || \in_array($key_, ['base_id', 'id', 'top_class']))
+            if(($recursive_columns && in_array($key_, $recursive_columns)) || \in_array($key_, ['base_id', 'id', 'top_class']))
 
                 $attributes[$key_] = $attribute_;
 
         $columns = $this->getColumns();
+
+        if($columns === false) $columns = [];
 
         foreach($attributes as $key => $value)
         {
