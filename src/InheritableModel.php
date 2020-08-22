@@ -1,6 +1,5 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
-use Cvsouth\Cloudship\Models\Product;
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Support\Collection;
