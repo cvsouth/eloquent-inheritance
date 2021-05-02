@@ -1,5 +1,7 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
+use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
+
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Support\Collection;
@@ -38,7 +40,7 @@ class InheritableModel extends BaseModel
 
     protected $parent_ = null;
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function __construct(array $attributes = [])
     {
@@ -279,6 +281,38 @@ class InheritableModel extends BaseModel
             $attributes[$column] = $value;
         }
         return $attributes;
+    }
+    public function updated_at_as($model_class_)
+    {
+        $column = $this->getUpdatedAtColumn();
+
+        $model = $this;
+
+        while(($model_class = \get_class($model)) !== $model_class_ && $model_class !== self::class)
+
+            $model = $model->parent_model();
+
+        return $model->hasColumn($column) ? $model->$column : null;
+    }
+    public function created_at_as($model_class_)
+    {
+        $column = $this->getCreatedAtColumn();
+
+        $model = $this;
+
+        while(($model_class = \get_class($model)) !== $model_class_ && $model_class !== self::class)
+
+            $model = $model->parent_model();
+
+        return $model->hasColumn($column) ? $model->$column : null;
+    }
+    public function hasRecursiveColumn($column)
+    {
+        return in_array($column, $this->getRecursiveColumns());
+    }
+    public function hasColumn($column)
+    {
+        return in_array($column, $this->getColumns());
     }
     public function id_as($model_class_)
     {

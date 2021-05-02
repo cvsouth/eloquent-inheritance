@@ -59,16 +59,14 @@ class QueryBuilder extends BaseQueryBuilder
 
         $inheritable_model = new InheritableModel();
 
-        if($column === $inheritable_model->getUpdatedAtColumn()
-
-        || $column === "top_class")
+        if($column === "top_class")
 
             $table = $inheritable_model->tableName();
 
         else
         {
             $recursive_columns = $model->getRecursiveColumns();
-            
+
             if(!$recursive_columns || !in_array($column, $recursive_columns)) return $column;
 
             $table = $model->tableForAttribute($column);

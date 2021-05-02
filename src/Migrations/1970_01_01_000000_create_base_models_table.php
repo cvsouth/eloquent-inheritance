@@ -15,8 +15,10 @@ class CreateBaseModelsTable extends Migration
         Schema::create(InheritableModel::tableName(), function (Blueprint $table)
         {
             $table->bigIncrements('id');
-            
+
             $table->string('top_class', 300);
+
+            $table->timestamps();
         });
     }
     public function down()
