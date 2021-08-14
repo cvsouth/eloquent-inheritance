@@ -276,8 +276,6 @@ class InheritableModel extends BaseModel
         {
             $value = $this->$column;
 
-            if($value instanceof DateTime) $value = (string) $value;
-
             $attributes[$column] = $value;
         }
         return $attributes;
