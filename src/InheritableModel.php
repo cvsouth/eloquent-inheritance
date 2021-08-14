@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Support\Collection;
 
+use Illuminate\Support\Carbon;
+
 use Illuminate\Support\Facades\Cache;
 
 use Illuminate\Support\Facades\DB;
@@ -55,6 +57,19 @@ class InheritableModel extends BaseModel
         $connection = $this->getConnection();
 
         return new QueryBuilder($connection, $connection->getQueryGrammar(), $connection->getPostProcessor());
+    }
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function($model)
+        {
+            if($model->timestamps) $model->created_at = Carbon::now();
+        });
+        static::updating(function($model)
+        {
+            if($model->timestamps) $model->updated_at = Carbon::now();
+        });
     }
     public function __set($key, $value)
     {
