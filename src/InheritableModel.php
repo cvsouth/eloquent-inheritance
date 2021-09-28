@@ -4,7 +4,7 @@ use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 
 use Illuminate\Support\Carbon;
 
@@ -202,7 +202,7 @@ class InheritableModel extends BaseModel
 
             else $elevated_models[] = $model;
         }
-        if($is_collection) $elevated_models = collect($elevated_models);
+        if($is_collection) $elevated_models = new Collection($elevated_models);
 
         return $elevated_models;
     }
