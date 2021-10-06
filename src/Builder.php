@@ -16,6 +16,10 @@ class Builder extends BaseBuilder
 
         return $builder;
     }
+    public function getModels($columns = ['*'])
+    {
+        return InheritableModel::elevateMultiple(parent::getModels($columns));
+    }
     public function get($columns = ['*'], $elevate = true)
     {
         if(!is_array($columns)) $columns = [$columns];
