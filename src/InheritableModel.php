@@ -1,10 +1,15 @@
 <?php namespace Cvsouth\EloquentInheritance;
 
+use Illuminate\Database\Eloquent\Concerns\HasRelationships;
+
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 
 use Illuminate\Database\Eloquent\Model as BaseModel;
 
 use Illuminate\Database\Eloquent\Collection;
+
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection as BaseCollection;
 
 use Illuminate\Support\Carbon;
 
@@ -165,7 +170,11 @@ class InheritableModel extends BaseModel
 
             $class = get_class($model);
 
-            $top_class = self::topClassWithBaseId($base_id);
+            if(!($model instanceof self))
+
+                $top_class = $class;
+
+            else $top_class = self::topClassWithBaseId($base_id);
 
             if($class !== $top_class)
             {
@@ -895,6 +904,33 @@ class InheritableModel extends BaseModel
             return $table_classes[$table_name];
 
         else return null;
+    }
+    protected function getRelationshipFromMethod($method)
+    {
+        $relation = $this->$method();
+
+        if (! $relation instanceof Relation)
+        {
+            if (is_null($relation))
+
+                throw new LogicException(sprintf('%s::%s must return a relationship instance, but "null" was returned. Was the "return" keyword used?', static::class, $method));
+
+            throw new LogicException(sprintf('%s::%s must return a relationship instance.', static::class, $method));
+        }
+        $value = $relation->getResults();
+
+        if($value instanceof self)
+
+            $value = $value->elevate();
+
+        elseif($value instanceof Collection)
+
+            $value = static::elevateMultiple($value);
+
+        return tap($value, function ($results) use ($method)
+        {
+            $this->setRelation($method, $results);
+        });
     }
     public static function select()
     {
