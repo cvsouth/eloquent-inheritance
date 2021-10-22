@@ -380,7 +380,7 @@ class InheritableModel extends BaseModel
                 {
                     $parent_table_name = $parent_class::tableName();
 
-                    $data = (array) DB::table($parent_table_name)->where($base_id_column, '=', $base_id)->first();
+                    $data = (array) DB::connection($this->getConnectionName())->table($parent_table_name)->where($base_id_column, '=', $base_id)->first();
 
                     if(\is_array($given_attributes) && \count($given_attributes) > 0)
 
