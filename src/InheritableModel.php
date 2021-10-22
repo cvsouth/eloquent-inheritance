@@ -141,9 +141,17 @@ class InheritableModel extends BaseModel
 
         else
         {
+            if(!empty(env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null)))
+
+                $connection = env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null);
+
+            else $connection = config('database.default');
+
             $top_class = DB
 
-                ::table(InheritableModel::tableName())
+                ::connection($connection)
+
+                ->table(InheritableModel::tableName())
 
                 ->where('id', '=', $base_id)
 
@@ -442,9 +450,9 @@ class InheritableModel extends BaseModel
 
             $columns = [];
 
-            if(DB::connection()->getDoctrineSchemaManager()->tablesExist([$table_name]))
+            if(DB::connection($this->getConnectionName())->getDoctrineSchemaManager()->tablesExist([$table_name]))
             {
-                $table_columns = DB::connection()->getDoctrineSchemaManager()->listTableColumns($table_name);
+                $table_columns = DB::connection($this->getConnectionName())->getDoctrineSchemaManager()->listTableColumns($table_name);
 
                 foreach($table_columns as $table_column)
 
@@ -811,7 +819,7 @@ class InheritableModel extends BaseModel
 
         else
         {
-            $has_attribute = Schema::hasColumn($this->getTable(), $key) || Schema::hasColumn($this->getTable(), $key . '_id');
+            $has_attribute = Schema::connection($this->getConnectionName())->hasColumn($this->getTable(), $key) || Schema::hasColumn($this->getTable(), $key . '_id');
 
             Cache::forever($cache_key, $has_attribute);
 

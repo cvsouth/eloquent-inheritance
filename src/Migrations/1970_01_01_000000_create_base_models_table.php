@@ -12,7 +12,13 @@ class CreateBaseModelsTable extends Migration
 {
     public function up()
     {
-        Schema::create(InheritableModel::tableName(), function (Blueprint $table)
+        if(!empty(env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null)))
+
+            $connection = env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null);
+
+        else $connection = config('database.default');
+
+        Schema::connection($connection)->create(InheritableModel::tableName(), function (Blueprint $table)
         {
             $table->bigIncrements('id');
 
@@ -23,6 +29,12 @@ class CreateBaseModelsTable extends Migration
     }
     public function down()
     {
-        Schema::drop(InheritableModel::tableName());
+        if(!empty(env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null)))
+
+            $connection = env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE', null);
+
+        else $connection = config('database.default');
+
+        Schema::connection($connection)->drop(InheritableModel::tableName());
     }
 }
