@@ -122,6 +122,10 @@ class InheritableModel extends BaseModel
         {
             $model = new $model_class;
 
+            if(env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE'))
+
+                $model->connection = env('DB_CONNECTION_INHERITABLE_MODELS_BASE_TABLE');
+
             $model->fill($attributes);
 
             if(isset($attributes['id']))

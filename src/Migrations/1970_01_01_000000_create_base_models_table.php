@@ -18,7 +18,9 @@ class CreateBaseModelsTable extends Migration
 
         else $connection = config('database.default');
 
-        Schema::connection($connection)->create(InheritableModel::tableName(), function (Blueprint $table)
+        $ignore = env('INHERITABLE_MODELS_NO_MIGRATION', false);
+        
+        if(!$ignore) Schema::connection($connection)->create(InheritableModel::tableName(), function (Blueprint $table)
         {
             $table->bigIncrements('id');
 
