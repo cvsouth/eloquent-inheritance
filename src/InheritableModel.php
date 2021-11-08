@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model as BaseModel;
 use Illuminate\Database\Eloquent\Collection;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
+
 use Illuminate\Support\Collection as BaseCollection;
 
 use Illuminate\Support\Carbon;
@@ -30,6 +31,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 use RegexIterator;
+
+use LogicException;
 
 class InheritableModel extends BaseModel
 {
@@ -1135,14 +1138,5 @@ class InheritableModel extends BaseModel
         $model = new static;
 
         return $model->forwardCallTo($model->newQuery(), 'without', func_get_args());
-    }
-    protected static function registerModelEvent($event, $callback)
-    {
-        return parent::registerModelEvent($event, function($model) use($callback)
-        {
-            if(static::class === $model->top_class)
-
-                return $callback($model);
-        });
     }
 }
