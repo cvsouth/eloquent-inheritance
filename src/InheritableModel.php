@@ -1136,4 +1136,13 @@ class InheritableModel extends BaseModel
 
         return $model->forwardCallTo($model->newQuery(), 'without', func_get_args());
     }
+    protected static function registerModelEvent($event, $callback)
+    {
+        return parent::registerModelEvent($event, function($model) use($callback)
+        {
+            if(static::class === $model->top_class)
+
+                return $callback($model);
+        });
+    }
 }
