@@ -9,7 +9,7 @@
       
         "illuminate/database": "^8.4|^9.0",
 
-        "doctrine/dbal": "^2.10"
+        "doctrine/dbal": "^2.10|^3.3"
     },
     "license": "proprietary",
 
